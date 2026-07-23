@@ -1,0 +1,61 @@
+/* Facilitator Portal Styles */
+.facilitator-page { display: flex; flex-direction: column; gap: var(--space-6); }
+
+.facilitator-nav {
+  display: flex; gap: var(--space-2); flex-wrap: wrap;
+  padding: var(--space-2); background: var(--color-bg-card);
+  border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+}
+.facilitator-nav-btn {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: none; border: 1px solid transparent;
+  border-radius: var(--radius-md); cursor: pointer;
+  color: var(--color-text-muted); font-size: var(--text-sm); font-weight: var(--font-medium);
+  font-family: var(--font-sans); transition: all var(--transition-fast);
+}
+.facilitator-nav-btn:hover { color: var(--color-text-primary); background: var(--color-surface); }
+.facilitator-nav-btn.active { color: var(--color-forest-pale); background: rgba(64,145,108,0.12); border-color: rgba(64,145,108,0.3); }
+
+.submit-success {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: rgba(82,183,136,0.12); border: 1px solid rgba(82,183,136,0.3);
+  border-radius: var(--radius-md); color: #52B788; font-weight: var(--font-medium);
+  animation: fadeInUp 0.3s ease;
+}
+
+.facilitator-form-card { }
+.form-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: var(--space-5); margin-bottom: var(--space-6); }
+
+/* Knowledge Bank */
+.knowledge-upload-area { margin-bottom: var(--space-5); }
+.upload-dropzone {
+  border: 2px dashed var(--color-border); border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-8); text-align: center;
+  cursor: pointer; transition: all var(--transition-base);
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+}
+.upload-dropzone:hover { border-color: var(--color-forest-light); background: var(--color-surface); }
+.upload-icon { color: var(--color-text-muted); }
+.upload-title { font-size: var(--text-base); font-weight: var(--font-semibold); }
+.upload-sub   { font-size: var(--text-sm); color: var(--color-text-muted); }
+.upload-langs { display: flex; gap: var(--space-2); }
+
+/* Village Dashboard */
+.village-dashboard { display: flex; flex-direction: column; gap: var(--space-4); }
+.village-table-wrapper { overflow-x: auto; border-radius: var(--radius-lg); border: 1px solid var(--color-border) !important; }
+
+/* Access Denied */
+.access-denied {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-4);
+  text-align: center; padding: var(--space-16) !important; max-width: 480px; margin: 0 auto;
+}
+.denied-icon { font-size: 64px; }
+.access-denied h2 { margin: 0; }
+.access-denied p { color: var(--color-text-secondary); }
+
+@media(max-width:640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .facilitator-nav { flex-direction: column; }
+}

@@ -1,0 +1,361 @@
+/* Advisory Page Styles – Crops, Livestock & Fisheries */
+.advisory-page { display: flex; flex-direction: column; gap: var(--space-6); }
+
+/* Main Category Tabs */
+.advisory-tabs { display: flex; gap: var(--space-3); border-bottom: 1px solid var(--color-border); padding-bottom: 2px; }
+.advisory-tab {
+  padding: var(--space-3) var(--space-6); background: none; border: none;
+  font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--font-semibold);
+  color: var(--color-text-muted); cursor: pointer; position: relative;
+  transition: all var(--transition-fast);
+}
+.advisory-tab:hover { color: var(--color-text-primary); }
+.advisory-tab.active { color: var(--color-forest-pale); }
+.advisory-tab.active::after {
+  content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--color-forest-light), var(--color-mint));
+  border-radius: var(--radius-full);
+}
+
+/* Crops Advisory Subtabs */
+.subtabs-bar { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap; }
+.subtab-btn {
+  padding: var(--space-2) var(--space-4); background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  font-family: var(--font-sans); font-size: var(--text-xs); font-weight: var(--font-semibold);
+  color: var(--color-text-secondary); cursor: pointer; transition: all var(--transition-fast);
+}
+.subtab-btn:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
+.subtab-btn.active { background: var(--color-surface-high); border-color: var(--color-forest-light); color: var(--color-forest-pale); }
+
+/* Category Filters */
+.category-filter { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-4); flex-wrap: wrap; }
+.filter-label { font-size: var(--text-sm); color: var(--color-text-muted); font-weight: var(--font-semibold); }
+.filter-chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.cat-chip {
+  padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
+  background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+  color: var(--color-text-muted); font-size: var(--text-xs); cursor: pointer;
+  transition: all var(--transition-fast); font-family: var(--font-sans);
+}
+.cat-chip:hover { color: var(--color-text-primary); border-color: var(--color-border-hover); }
+.cat-chip.active { color: var(--color-forest-pale); border-color: var(--color-forest-light); background: rgba(64,145,108,0.12); }
+
+/* Crops Grid Layout */
+.pop-grid-layout { display: grid; grid-template-columns: 240px 1fr; gap: var(--space-6); }
+.crop-selector { display: flex; flex-direction: column; gap: var(--space-2); }
+.crop-btn {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); cursor: pointer;
+  transition: all var(--transition-base); text-align: left; width: 100%;
+}
+.crop-btn:hover { border-color: var(--color-forest-light); transform: translateX(4px); }
+.crop-btn.active { border-color: var(--color-forest-light); background: rgba(64,145,108,0.12); box-shadow: 0 0 12px rgba(64,145,108,0.2); }
+.crop-emoji { font-size: 28px; }
+.crop-btn-name { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-primary); }
+.crop-btn-telugu { font-size: var(--text-xs); color: var(--color-text-muted); font-family: var(--font-telugu); }
+
+.crop-practices-details { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
+
+/* Crop Info Banner */
+.cib-header { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.cib-icon { font-size: 48px; }
+.cib-header h2 { margin: 0; font-size: var(--text-xl); }
+.cib-header p { color: var(--color-text-muted); font-size: var(--text-sm); margin: 0; }
+.cib-badges { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-left: auto; }
+.cib-soil { font-size: var(--text-sm); color: var(--color-text-secondary); }
+.telugu-text { font-family: var(--font-telugu); color: var(--color-text-muted); font-size: 0.9em; }
+
+/* PoP Stages */
+.pop-stages { display: flex; flex-direction: column; gap: var(--space-3); }
+.pop-stage-card { padding: 0 !important; overflow: hidden; }
+.pop-stage-header {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: none; border: none; cursor: pointer;
+  width: 100%; text-align: left; color: var(--color-text-primary);
+  transition: background var(--transition-fast);
+}
+.pop-stage-header:hover { background: var(--color-surface); }
+.pop-stage-num {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--color-forest-mid), var(--color-forest-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-xs); font-weight: var(--font-bold); color: white;
+}
+.pop-stage-title-area { flex: 1; }
+.pop-stage-name { font-size: var(--text-sm); font-weight: var(--font-semibold); }
+.pop-stage-timing { font-size: var(--text-xs); color: var(--color-text-muted); }
+.pop-stage-toggle { color: var(--color-text-muted); }
+
+.pop-stage-body {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  animation: fadeIn 0.2s ease;
+}
+.pop-stage-advice {
+  display: flex; align-items: flex-start; gap: var(--space-2);
+  font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;
+}
+.pop-stage-advice svg { color: var(--color-forest-pale); flex-shrink: 0; margin-top: 2px; }
+.pop-stage-inputs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-secondary); }
+
+/* Image Diagnosis Widget */
+.image-diagnosis-card {
+  background: linear-gradient(135deg, var(--color-bg-card), rgba(45, 106, 79, 0.04));
+  margin-bottom: var(--space-4);
+}
+.diagnosis-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-6); }
+
+.diagnosis-uploader { display: flex; flex-direction: column; gap: var(--space-2); }
+.dropzone {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+  background: rgba(13,27,15,0.4);
+  cursor: pointer; position: relative;
+  transition: all var(--transition-base);
+}
+.dropzone:hover, .dropzone.active {
+  border-color: var(--color-forest-light);
+  background: rgba(64,145,108,0.06);
+}
+.dropzone.loading {
+  border-color: var(--color-sky);
+  background: rgba(72,202,228,0.04);
+  cursor: not-allowed;
+}
+
+.upload-icon { animation: float 3s ease-in-out infinite; }
+.dropzone-text { font-size: var(--text-sm); font-weight: var(--font-medium); }
+.dropzone-text span { color: var(--color-forest-pale); text-decoration: underline; }
+.file-input-hidden { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+.loading-spinner-area { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+.loading-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid rgba(72,202,228,0.15);
+  border-top-color: var(--color-sky);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.sample-selector { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
+.sample-buttons { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+/* Diagnosis Result */
+.diagnosis-result-container { display: flex; justify-content: center; }
+.diagnosis-result-box {
+  width: 100%; display: flex; flex-direction: column; gap: var(--space-4);
+  padding: var(--space-5) !important;
+}
+.dr-header { display: flex; align-items: center; gap: var(--space-3); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-3); }
+.dr-filename { font-size: 11px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dr-confidence { margin-left: auto; }
+
+.dr-crop-disease { display: flex; align-items: center; gap: var(--space-3); }
+.dr-crop-disease h5 { font-size: var(--text-base); font-weight: var(--font-bold); }
+.dr-crop-disease .scientific { font-size: var(--text-xs); font-style: italic; }
+
+.dr-details { display: flex; flex-direction: column; gap: var(--space-2); background: var(--color-surface); padding: var(--space-3); border-radius: var(--radius-sm); }
+.dr-detail-row { display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); }
+.dr-detail-row .label { color: var(--color-text-muted); }
+
+.dr-advice { display: flex; flex-direction: column; gap: var(--space-1); }
+.dr-advice h6 { font-size: var(--text-xs); font-weight: var(--font-bold); color: var(--color-text-primary); }
+.dr-advice p { font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.5; }
+.border-top-glow { border-top: 1px solid var(--color-border); padding-top: var(--space-3); }
+
+.diagnosis-placeholder {
+  width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--space-3); border-style: dashed; padding: var(--space-8) !important;
+}
+.placeholder-icon { color: var(--color-text-muted); }
+
+/* Common Pests Gallery Header */
+.pest-search-controls { margin: var(--space-6) 0 var(--space-4); }
+
+/* Pest Controls */
+.pest-view { display: flex; flex-direction: column; gap: var(--space-6); }
+.pest-controls { display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
+.filter-btns { display: flex; gap: var(--space-2); }
+.filter-btn {
+  display: flex; align-items: center; gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-elevated); border: 1px solid var(--color-border);
+  border-radius: var(--radius-full); cursor: pointer; color: var(--color-text-muted);
+  font-size: var(--text-sm); font-family: var(--font-sans);
+  transition: all var(--transition-fast);
+}
+.filter-btn:hover { color: var(--color-text-primary); border-color: var(--color-border-hover); }
+.filter-btn.active { color: var(--color-forest-pale); border-color: var(--color-forest-light); background: rgba(64,145,108,0.1); }
+
+.pest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); }
+.pest-card {
+  cursor: pointer; position: relative;
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-5) !important;
+  transition: all var(--transition-base);
+}
+.pest-card:hover { border-color: var(--color-forest-light); box-shadow: var(--shadow-md), var(--shadow-glow); }
+.outbreak-badge { position: absolute; top: var(--space-3); right: var(--space-3); }
+.pest-icon { font-size: 36px; }
+.pest-name { font-size: var(--text-base); font-weight: var(--font-bold); }
+.pest-scientific { font-size: var(--text-xs); color: var(--color-text-muted); font-style: italic; }
+.pest-crop-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.pest-symptom-preview { font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.5; margin-top: var(--space-2); }
+
+/* Pest Modal */
+.pest-modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: var(--z-modal); display: flex; align-items: center; justify-content: center;
+  padding: var(--space-4); animation: fadeIn 0.2s ease;
+}
+.pest-modal {
+  width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+  position: relative; display: flex; flex-direction: column; gap: var(--space-4);
+  animation: fadeInUp 0.3s ease;
+}
+.pest-modal-close { align-self: flex-end; }
+.pest-modal-icon { font-size: 48px; }
+.pest-modal h2 { margin: 0; }
+.pest-modal-sci { color: var(--color-text-muted); font-style: italic; font-size: var(--text-sm); }
+.pest-modal-tags { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.pest-modal-section h4 { font-size: var(--text-sm); margin-bottom: var(--space-2); }
+.pest-modal-section p { font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.7; }
+
+/* ============================================================
+   LIVESTOCK ADVISORY STYLES
+   ============================================================ */
+.livestock-view { display: flex; flex-direction: column; gap: var(--space-6); }
+.livestock-selector { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.livestock-btn {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); cursor: pointer;
+  transition: all var(--transition-base); text-align: left;
+}
+.livestock-btn:hover { border-color: var(--color-forest-light); transform: translateY(-2px); }
+.livestock-btn.active { border-color: var(--color-forest-light); background: rgba(64,145,108,0.12); box-shadow: 0 0 12px rgba(64,145,108,0.2); }
+.livestock-emoji { font-size: 28px; }
+.livestock-btn-name { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-primary); }
+.livestock-btn-telugu { font-size: var(--text-xs); color: var(--color-text-muted); font-family: var(--font-telugu); }
+
+.livestock-details { display: flex; flex-direction: column; gap: var(--space-6); }
+.livestock-tabs-container { display: flex; flex-direction: column; gap: var(--space-5); }
+.guidelines-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); }
+.guideline-card { display: flex; flex-direction: column; gap: var(--space-2); }
+.guideline-card h5 { font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--color-text-primary); }
+.guideline-card p { font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.5; }
+
+/* ============================================================
+   FISHERIES ADVISORY STYLES
+   ============================================================ */
+.fisheries-view { display: flex; flex-direction: column; gap: var(--space-6); }
+.calculator-card { background: linear-gradient(135deg, var(--color-bg-card), rgba(72, 202, 228, 0.03)); }
+.calc-header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.calc-header h3 { font-size: var(--text-lg); font-weight: var(--font-bold); }
+.calc-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: var(--space-6); }
+
+.calc-inputs { display: flex; flex-direction: column; gap: var(--space-4); }
+.calc-results-box { padding: var(--space-5) !important; display: flex; flex-direction: column; gap: var(--space-5); }
+.calc-results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+.calc-stat { display: flex; flex-direction: column; gap: var(--space-1); background: var(--color-bg-elevated); padding: var(--space-3) var(--space-2); border-radius: var(--radius-sm); text-align: center; }
+.calc-stat .val { font-size: var(--text-sm); font-weight: var(--font-bold); }
+.calc-stat .key { font-size: 10px; color: var(--color-text-muted); }
+.calc-stat.highlight { border-left: 3px solid; }
+
+.fish-species-ratio { display: flex; flex-direction: column; gap: var(--space-2); }
+.fish-species-ratio h6 { font-size: var(--text-xs); font-weight: var(--font-bold); }
+.ratio-bar {
+  display: flex; height: 24px; border-radius: var(--radius-sm); overflow: hidden;
+  font-size: 10px; font-weight: var(--font-bold); text-align: center; line-height: 24px;
+}
+.ratio-segment { color: var(--color-text-inverse); }
+.ratio-segment.surface { background: var(--color-sky); color: white; }
+.ratio-segment.column { background: var(--color-mint); color: var(--color-forest); }
+.ratio-segment.bottom { background: var(--color-soil-light); color: white; }
+
+.fish-guides-container { display: flex; flex-direction: column; gap: var(--space-4); }
+.fish-guide-selector { display: flex; gap: var(--space-2); border-bottom: 1px solid var(--color-border); padding-bottom: 2px; }
+.guide-tab-btn {
+  padding: var(--space-2) var(--space-4); background: none; border: none;
+  font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--font-semibold);
+  color: var(--color-text-muted); cursor: pointer; transition: all var(--transition-fast);
+}
+.guide-tab-btn:hover { color: var(--color-text-primary); }
+.guide-tab-btn.active { color: var(--color-sky); border-bottom: 2px solid var(--color-sky); }
+
+.fish-guide-content { background: var(--color-bg-card); }
+.fish-varieties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.variety-item h4 { font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-3); }
+.variety-details-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-2); }
+.variety-details-list li { display: flex; justify-content: space-between; font-size: var(--text-xs); border-bottom: 1px solid rgba(116, 198, 157, 0.05); padding-bottom: 4px; }
+.variety-details-list li span { color: var(--color-text-muted); }
+
+.weeding-table-container { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4); }
+.weeding-row { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) !important; }
+.weeding-header { display: flex; align-items: center; gap: var(--space-3); }
+.num-circle {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface-high);
+  display: flex; align-items: center; justify-content: center; font-size: var(--text-xs); font-weight: var(--font-bold);
+}
+.weeding-header h5 { font-size: var(--text-sm); font-weight: var(--font-bold); }
+
+.fish-guide-manuring { min-height: 0; }
+.manuring-schedule { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.schedule-item h5 { font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--color-text-primary); margin-bottom: var(--space-2); }
+.schedule-item p { font-size: var(--text-xs); color: var(--color-text-secondary); line-height: 1.5; }
+
+/* ============================================================
+   MANAGEMENT / CRUD DASHBOARD STYLES
+   ============================================================ */
+.manage-advisories-view { display: flex; flex-direction: column; gap: var(--space-4); }
+.categories-manager, .crops-list-card, .pests-list-card, .livestock-list-card { min-height: 0; }
+
+.cat-add-form { display: flex; gap: var(--space-2); max-width: 500px; }
+
+/* Table Logs Inherited / Standardized */
+.logs-table { width: 100%; border-collapse: collapse; text-align: left; }
+.logs-table th { padding: var(--space-3); font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; border-bottom: 2px solid var(--color-border); }
+.logs-table td { padding: var(--space-3); font-size: var(--text-xs); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.logs-table tr:hover td { background: var(--color-surface); }
+
+/* Form layouts */
+.register-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+.form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.form-group label { font-size: var(--text-xs); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
+
+.form-submit-row { display: flex; gap: var(--space-3); margin-top: var(--space-4); border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+
+/* Dynamic stage rows */
+.pop-form-stages-area { display: flex; flex-direction: column; gap: var(--space-3); }
+.pop-stage-row { border: 1px dashed var(--color-border); border-radius: var(--radius-md); background: rgba(13,27,15,0.2); }
+
+/* Action Icon Buttons */
+.btn-icon {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  border-radius: var(--radius-sm); display: inline-flex; align-items: center; justify-content: center;
+  transition: all var(--transition-fast);
+}
+.btn-icon:hover { background: var(--color-surface-high); }
+.btn-icon.text-sky { color: var(--color-sky); }
+.btn-icon.text-sky:hover { color: var(--color-sky-dark); }
+.btn-icon.text-alert { color: var(--color-alert-red); }
+.btn-icon.text-alert:hover { color: #FF6B6B; }
+
+@media(max-width:900px) {
+  .pop-grid-layout { grid-template-columns: 1fr; }
+  .crop-selector { flex-direction: row; overflow-x: auto; padding-bottom: var(--space-2); }
+  .crop-btn { flex-shrink: 0; width: auto; }
+  .diagnosis-grid { grid-template-columns: 1fr; }
+  .calc-grid { grid-template-columns: 1fr; }
+  .register-form-grid { grid-template-columns: 1fr; }
+  .register-form-grid > div { grid-column: span 1 !important; }
+}

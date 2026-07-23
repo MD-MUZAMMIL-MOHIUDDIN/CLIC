@@ -1,0 +1,114 @@
+/* ============================================================
+   CLIC Design System – CSS Custom Properties
+   Proposal-themed Modern Light Mode
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ── Proposal Theme Colors (Blue & Emerald Accents) ── */
+  --color-forest:       #2563EB; /* Blue --accent */
+  --color-forest-mid:   #1D4ED8;
+  --color-forest-light: #3B82F6;
+  --color-forest-pale:  #2563EB;
+  --color-mint:         #059669; /* Emerald --accent2 */
+
+  --color-amber:        #d97706; /* Warn */
+  --color-amber-dark:   #b45309;
+  --color-amber-light:  #f59e0b;
+
+  --color-sky:          #0284c7;
+  --color-sky-dark:     #0369a1;
+  --color-sky-pale:     #38bdf8;
+
+  --color-soil:         #78350f;
+  --color-soil-light:   #92400e;
+  --color-soil-pale:    #d97706;
+
+  --color-alert-red:    #dc2626; /* Danger */
+  --color-alert-orange: #d97706;
+  --color-alert-yellow: #f59e0b;
+
+  /* ── Neutrals (Slate Light Mode) ── */
+  --color-bg:           #F8FAFC; /* --bg */
+  --color-bg-card:      #FFFFFF; /* --bg2 */
+  --color-bg-elevated:  #F1F5F9; /* --bg3 */
+  --color-bg-hover:     #E2E8F0;
+  --color-surface:      rgba(37, 99, 235, 0.04);
+  --color-surface-high: rgba(37, 99, 235, 0.08);
+
+  --color-border:       rgba(15, 23, 42, 0.08); /* --border */
+  --color-border-hover: rgba(15, 23, 42, 0.15); /* --border2 */
+
+  --color-text-primary: #0F172A; /* --text */
+  --color-text-secondary:#475569; /* --muted */
+  --color-text-muted:   #64748B;
+  --color-text-inverse: #FFFFFF;
+
+  /* ── Typography ── */
+  --font-sans:    'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-telugu:  'Noto Sans Telugu', 'Outfit', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+
+  --font-light:    300;
+  --font-regular:  400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+  --font-extrabold:800;
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  /* ── Border Radius ── */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   1rem;
+  --radius-xl:   1.5rem;
+  --radius-2xl:  2rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm:   0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md:   0 4px 12px rgba(15, 23, 42, 0.02), 0 2px 4px rgba(15, 23, 42, 0.01);
+  --shadow-lg:   0 10px 24px rgba(15, 23, 42, 0.05), 0 4px 8px rgba(15, 23, 42, 0.03);
+  --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.1);
+  --shadow-amber-glow: 0 0 16px rgba(217, 119, 6, 0.1);
+
+  /* ── Layout ── */
+  --sidebar-width:        260px;
+  --sidebar-collapsed:    72px;
+  --header-height:        64px;
+  --content-max:          1400px;
+
+  /* ── Transitions ── */
+  --transition-fast:   150ms ease;
+  --transition-base:   250ms ease;
+  --transition-slow:   400ms ease;
+  --transition-spring: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index ── */
+  --z-sidebar:  100;
+  --z-header:   200;
+  --z-modal:    300;
+  --z-toast:    400;
+}

@@ -1,0 +1,148 @@
+/* Groundwater Page Styles */
+.groundwater-page { display: flex; flex-direction: column; gap: var(--space-6); }
+
+/* Controls Bar */
+.groundwater-controls { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2); }
+
+/* Notification Toast */
+.notification-toast {
+  position: fixed; top: 20px; right: 20px;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md); border-left: 4px solid;
+  z-index: var(--z-toast); box-shadow: var(--shadow-lg);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm); font-weight: var(--font-semibold);
+}
+.notification-toast.alert-success { background: var(--color-bg-card); border-color: var(--color-forest-light); }
+.notification-toast.alert-error   { background: var(--color-bg-card); border-color: var(--color-alert-red); }
+
+/* Layout Split */
+.groundwater-list-layout { display: grid; grid-template-columns: 300px 1fr; gap: var(--space-6); }
+
+/* Sidebar */
+.wells-sidebar { display: flex; flex-direction: column; gap: var(--space-4); }
+.wells-list-container { display: flex; flex-direction: column; gap: var(--space-3); max-height: 70vh; overflow-y: auto; padding-right: 4px; }
+
+.well-item-card {
+  padding: var(--space-4) !important;
+  display: flex; flex-direction: column; gap: var(--space-2);
+  text-align: left; width: 100%; cursor: pointer;
+  transition: all var(--transition-base);
+}
+.well-item-card:hover { border-color: var(--color-sky); transform: translateY(-2px); }
+.well-item-card.active { border-color: var(--color-sky-dark); background: rgba(72,202,228,0.08); box-shadow: 0 0 12px rgba(72,202,228,0.15); }
+
+.well-item-header { display: flex; align-items: center; gap: var(--space-3); position: relative; }
+.well-emoji { font-size: 24px; }
+.well-item-header div { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.well-item-name { font-size: var(--text-sm); font-weight: var(--font-bold); color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.well-item-farmer { font-size: 10px; color: var(--color-text-muted); }
+.well-item-header .badge { position: absolute; top: 0; right: 0; }
+
+.well-item-sub { display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-secondary); border-top: 1px solid rgba(116, 198, 157, 0.05); padding-top: 6px; }
+
+/* Details Pane */
+.well-details-pane { min-width: 0; }
+.well-details-card { display: flex; flex-direction: column; gap: var(--space-6); }
+
+/* Spec Grid */
+.well-spec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+.spec-stat {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--space-4); background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  text-align: center;
+}
+.spec-stat .val { font-size: var(--text-lg); font-weight: var(--font-extrabold); color: var(--color-text-primary); }
+.spec-stat .key { font-size: 10px; color: var(--color-text-muted); text-transform: uppercase; margin-top: 2px; }
+
+/* Visualizer Split */
+.details-visualizer-split { display: grid; grid-template-columns: 240px 1fr; gap: var(--space-6); }
+
+/* Depth Visualizer */
+.well-visualizer { display: flex; flex-direction: column; gap: var(--space-4); align-items: center; background: rgba(13,27,15,0.3); }
+.well-visualizer h5 { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; }
+.well-column-container {
+  position: relative; width: 64px; height: 260px;
+  background: var(--color-bg-elevated); border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm); margin: var(--space-4) 0;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+.well-casing {
+  position: absolute; top: 0; left: 0; right: 0;
+  border-bottom: 2px solid var(--color-amber-dark);
+  background: linear-gradient(90deg, #6c757d, #adb5bd, #6c757d);
+}
+.well-shaft { position: relative; width: 100%; height: 100%; }
+
+.visual-ground-label {
+  position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--color-text-muted); white-space: nowrap;
+}
+.visual-depth-label {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--color-text-muted); white-space: nowrap;
+}
+
+.water-level-line {
+  position: absolute; left: -24px; right: -24px; height: 1px;
+  background: var(--color-sky-dark); display: flex; align-items: center;
+}
+.water-level-line::before {
+  content: ''; position: absolute; left: 0; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--color-sky-dark); transform: translate(-50%, -50%);
+}
+.water-level-line span {
+  position: absolute; left: 72px; font-size: 9px; font-weight: var(--font-semibold);
+  color: var(--color-sky); white-space: nowrap; background: var(--color-bg-card);
+  padding: 1px 4px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);
+}
+
+.water-column {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(72,202,228,0.4), rgba(0,119,182,0.7));
+  animation: waterPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes waterPulse {
+  0% { opacity: 0.85; }
+  100% { opacity: 0.95; }
+}
+
+/* History Logs Table */
+.well-logs-history { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.well-logs-history h5 { font-size: var(--text-sm); font-weight: var(--font-bold); border-bottom: 1px solid var(--color-border); padding-bottom: var(--space-2); }
+.table-responsive { width: 100%; overflow-x: auto; }
+.logs-table { width: 100%; border-collapse: collapse; text-align: left; }
+.logs-table th { padding: var(--space-2) var(--space-3); font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; border-bottom: 2px solid var(--color-border); }
+.logs-table td { padding: var(--space-3); font-size: var(--text-xs); border-bottom: 1px solid var(--color-border); }
+.logs-table tr:hover td { background: var(--color-surface); }
+
+/* Forms Grid */
+.register-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
+.register-form-grid .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
+.register-form-grid .form-group label { font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--color-text-secondary); }
+.register-form-grid .form-group label .text-alert { color: var(--color-alert-red); margin-left: 2px; }
+
+/* Geo Integration */
+.geo-integration-field { grid-column: span 2; }
+.geo-inputs-wrapper { display: flex; gap: var(--space-3); align-items: center; }
+.geo-inputs-wrapper input { flex: 1; }
+.geo-detect-btn { flex-shrink: 0; }
+.geo-status { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); margin-top: 4px; }
+.geo-status.success-msg { color: var(--color-forest-pale); }
+.geo-status.error-msg   { color: #FF6B6B; }
+
+.form-submit-row { grid-column: span 2; display: flex; gap: var(--space-3); margin-top: var(--space-4); border-top: 1px solid var(--color-border); padding-top: var(--space-4); }
+
+@media(max-width:900px) {
+  .groundwater-list-layout { grid-template-columns: 1fr; }
+  .details-visualizer-split { grid-template-columns: 1fr; }
+  .well-visualizer { align-items: center; }
+  .register-form-grid { grid-template-columns: 1fr; }
+  .geo-integration-field { grid-column: span 1; }
+  .geo-inputs-wrapper { flex-direction: column; align-items: stretch; }
+  .form-submit-row { grid-column: span 1; }
+  .well-spec-grid { grid-template-columns: 1fr 1fr; }
+}
