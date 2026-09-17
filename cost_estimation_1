@@ -1,0 +1,45 @@
+# CLIC: Product Cost & Infrastructure Cost Estimation
+
+This artifact outlines the product development and infrastructure cost estimations for the CLIC (Climate/Crop Learning & Information Centre) application, formatted exactly in accordance with your specified layout.
+
+---
+
+## 1. Product Development Cost Estimation (CapEx)
+
+This table breaks down the cost of building each core module of the application based on a daily rate for development and design resources.
+
+| # | Module Name | Unit Cost (₹/day) | No. of Days | Complexity | Total Cost (₹) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | Authentication & Authorization (Identity) | ₹3,000 | 5 | Medium | ₹15,000 |
+| 2 | User Management (Farmer, Facilitator & Admin Roles) | ₹3,000 | 4 | Medium | ₹12,000 |
+| 3 | Dashboard Hub & Quick Services Access Panel | ₹2,500 | 3 | Low | ₹7,500 |
+| 4 | Agro-Met Weather Service & Warning Trigger Engine | ₹3,000 | 6 | Medium | ₹18,000 |
+| 5 | Crop Advisory CMS (Pest Diagnosis & Action Sheets) | ₹3,000 | 7 | Medium | ₹21,000 |
+| 6 | Groundwater Logs & Historical Level Analytics | ₹2,500 | 5 | Low | ₹12,500 |
+| 7 | Farmer Learning Hub (Streaming & PDF Resource CMS) | ₹2,500 | 5 | Low | ₹12,500 |
+| 8 | APMC Live Market Prices & Price Trend Analytics | ₹3,000 | 6 | Medium | ₹18,000 |
+| 9 | Custom Hiring Center (Equipment Renting & Bookings) | ₹3,500 | 8 | High | ₹28,000 |
+| 10 | Government Schemes Registry & Online Applications | ₹3,000 | 6 | Medium | ₹18,000 |
+| 11 | Facilitator Portal (Visits Log & Coordinates Tracker) | ₹3,500 | 9 | High | ₹31,500 |
+| 12 | Communication Gateway (SMS, WhatsApp, FCM, Email) | ₹3,000 | 6 | Medium | ₹18,000 |
+| 13 | Admin Console (Content Moderation & Review Panels) | ₹3,000 | 8 | Medium | ₹24,000 |
+| 14 | System Integration, Security Audits & Deployment | ₹3,000 | 7 | Medium | ₹21,000 |
+| **Total** | **All Development Modules** | | **85** | | **₹249,500** |
+
+---
+
+## 2. Infrastructure & Third-Party Service Cost Estimation (OpEx)
+
+This table outlines the hosting, database, notification channel gateways, and API subscription costs over a **12-month duration**.
+
+| # | Server / Service | Specification | Cost/Month (₹) | Duration (Months) | Total Cost (₹) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | Application Server (API) | 4 vCPU, 8 GB RAM, 50 GB SSD – Azure/AWS | ₹4,500 | 12 | ₹54,000 |
+| 2 | Database Server (PostgreSQL) | 4 vCPU, 16 GB RAM, 100 GB SSD – Managed DB | ₹6,000 | 12 | ₹72,000 |
+| 3 | SMS & WhatsApp Gateway | Twilio/MSG91 (25k OTP and notification messages/month) | ₹4,000 | 12 | ₹48,000 |
+| 4 | Email Server (AWS SES - Noreply) | Transactional email delivery (10k emails/month) | ₹500 | 12 | ₹6,000 |
+| 5 | Media Storage Bucket & CDN | AWS S3 + Cloudflare CDN (Videos, manuals & images) | ₹1,200 | 12 | ₹14,400 |
+| 6 | Redis Cache & Queue Manager | Session caching and background job worker processing | ₹1,500 | 12 | ₹18,000 |
+| 7 | External APIs | Weather API & Mapbox Geocoding APIs | ₹1,800 | 12 | ₹21,600 |
+| 8 | Application Monitoring & Logs | Sentry error tracking + Datadog server health metrics | ₹2,000 | 12 | ₹24,000 |
+| **Total** | **Infrastructure Expenses** | | **₹21,500** | | **₹258,000** |

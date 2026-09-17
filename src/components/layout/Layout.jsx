@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
@@ -8,6 +8,13 @@ import '../../styles/globals.css';
 export default function Layout() {
   const { user, loading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+
+  // Close mobile drawer on route transition
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, location.search]);
 
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'var(--color-bg)' }}>
@@ -23,10 +30,17 @@ export default function Layout() {
   const isFarmer = user?.role === 'farmer';
 
   return (
-    <div className={`page-layout ${isFarmer ? 'farmer-layout' : ''}`}>
-      {!isFarmer && <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />}
+    <div className={`page-layout ${isFarmer ? 'farmer-layout' : ''} ${mobileOpen ? 'mobile-sidebar-open' : ''}`}>
+      <Sidebar 
+        collapsed={collapsed} 
+        onToggle={() => setCollapsed(!collapsed)} 
+        mobileOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      />
+      {mobileOpen && <div className="sidebar-backdrop" onClick={() => setMobileOpen(false)} />}
+      
       <div className={`main-content ${isFarmer ? 'farmer-main-content' : collapsed ? 'sidebar-collapsed' : ''}`}>
-        <Header sidebarCollapsed={collapsed} />
+        <Header sidebarCollapsed={collapsed} onMenuToggle={() => setMobileOpen(!mobileOpen)} />
         <div className="page-wrapper animate-fade-in">
           <Outlet />
         </div>

@@ -177,3 +177,72 @@
 .header-avatar { font-size: 22px; }
 .header-user-info { display: flex; flex-direction: column; gap: 2px; }
 .header-username { font-size: var(--text-xs); font-weight: var(--font-semibold); line-height: 1; }
+
+/* Mobile Menu Button */
+.mobile-menu-toggle-btn {
+  display: none;
+}
+
+/* ── Mobile Header Responsiveness ── */
+@media (max-width: 1023px) {
+  .app-header {
+    left: 0 !important;
+    padding: 0 var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .mobile-menu-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+  }
+
+  .mobile-menu-toggle-btn:hover {
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+  }
+
+  /* Hide Horizontal Farmer Nav - they will use side drawer now */
+  .header-nav {
+    display: none !important;
+  }
+
+  .header-location {
+    display: none; /* Hide location text on mobile to make room */
+  }
+
+  .header-search {
+    max-width: 200px;
+  }
+
+  .header-actions {
+    gap: var(--space-2);
+  }
+
+  .header-user {
+    padding: var(--space-2);
+  }
+
+  .header-user-info {
+    display: none; /* Hide name/role on mobile, just show avatar */
+  }
+}
+
+@media (max-width: 480px) {
+  .header-search {
+    display: none; /* Hide search entirely on very small screens to prevent overlap */
+  }
+  .lang-toggle {
+    display: none; /* Hide language toggle in header to save space if needed */
+  }
+}
+

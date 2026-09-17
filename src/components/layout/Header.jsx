@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Bell, MapPin, LogOut } from 'lucide-react';
+import { Search, Bell, MapPin, LogOut, Menu } from 'lucide-react';
 import { alerts } from '../../data/weatherData';
 import '../../styles/header.css';
 
@@ -15,7 +15,7 @@ const FARMER_NAV = [
   { path: '/weather',     label: 'Weather' }
 ];
 
-export default function Header({ sidebarCollapsed }) {
+export default function Header({ sidebarCollapsed, onMenuToggle }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchVal, setSearchVal] = useState('');
@@ -37,6 +37,16 @@ export default function Header({ sidebarCollapsed }) {
 
   return (
     <header className={`app-header ${isFarmer ? 'farmer-header' : sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      {/* Mobile Menu Button */}
+      <button 
+        type="button" 
+        className="mobile-menu-toggle-btn" 
+        onClick={onMenuToggle}
+        aria-label="Toggle navigation menu"
+      >
+        <Menu size={20} />
+      </button>
+
       {/* Location */}
       <div className="header-location">
         <MapPin size={14} />

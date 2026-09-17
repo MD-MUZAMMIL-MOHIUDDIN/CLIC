@@ -82,5 +82,25 @@
 .wb-val { font-size: var(--text-xl); font-weight: var(--font-bold); margin-bottom: var(--space-1); }
 .wb-key { font-size: var(--text-xs); color: var(--color-text-muted); }
 
-@media(max-width:900px) { .weekly-cards { grid-template-columns: repeat(4,1fr); } }
-@media(max-width:640px) { .weekly-cards { grid-template-columns: repeat(2,1fr); } .daily-stats-grid { grid-template-columns: repeat(2,1fr); } .wb-results { grid-template-columns: 1fr; } }
+@media(max-width:900px) {
+  .weekly-cards {
+    display: flex;
+    overflow-x: auto;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .weekly-card {
+    flex: 0 0 130px;
+    scroll-snap-align: start;
+  }
+}
+@media(max-width:640px) {
+  .daily-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .wb-results { grid-template-columns: 1fr; }
+}
+@media(max-width:480px) {
+  .daily-stats-grid { grid-template-columns: 1fr; }
+}
+

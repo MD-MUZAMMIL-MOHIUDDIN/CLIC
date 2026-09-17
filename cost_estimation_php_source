@@ -1,0 +1,85 @@
+# CLIC: Product Cost & Infrastructure Cost Estimation (.NET Core & React.js)
+
+This document outlines the detailed product development (CapEx) and operational infrastructure (OpEx) cost estimations for migrating the legacy **CLIC** (Climate/Crop Learning & Information Centre) CodeIgniter PHP application to a modern enterprise-grade stack: **.NET Core (ASP.NET Core Web API)** and **React.js**.
+
+---
+
+## 1. Application Architecture Overview
+
+By migrating to a .NET Core and React.js stack, the application benefits from strong typing, high performance, cross-platform deployment, and robust enterprise design patterns (Dependency Injection, Repository Pattern, Entity Framework Core).
+
+```mermaid
+graph TD
+    User([Farmer / Facilitator / Admin]) -->|HTTPS| ReactFront[React.js Frontend App]
+    ReactFront -->|JSON / API Requests| DotNetAPI[ASP.NET Core Web API]
+    DotNetAPI -->|Entity Framework Core| DbContext[Application DB Context]
+    DbContext -->|Read/Write| RelationalDB[(PostgreSQL / MS SQL Server)]
+    DotNetAPI -->|Background Service| HostedService[Background Tasks / Queue Workers]
+    HostedService -->|Alert Triggers| MsgGateway[SMS / WhatsApp / Email Gateways]
+    DotNetAPI -->|Media Storage| BlobStorage[Azure Blob / S3 Storage]
+    DotNetAPI -->|Weather Ingestion| WeatherAPI[Weather & Mapbox APIs]
+```
+
+### Key Technical Stack Components:
+- **Frontend**: React.js (Vite, Axios, Tailwind CSS/Vanilla CSS, Chart.js/Recharts).
+- **Backend API**: ASP.NET Core Web API (.NET 8.0) in C#.
+- **ORM / Database Access**: Entity Framework Core (EF Core) with Migrations.
+- **Security / Auth**: JWT (JSON Web Tokens) with ASP.NET Core Identity (Role-based access).
+- **Database**: PostgreSQL (Recommended for cost efficiency) or Microsoft SQL Server.
+
+---
+
+## 2. Product Development Cost Estimation (CapEx)
+
+Migrating the legacy system requires mapping out the 10+ core CodeIgniter controller operations to .NET Core Controllers, DTOs, and Services, and developing corresponding React views. The estimated schedule is **120 development days** due to the architectural setup and strong-typing boilerplate.
+
+We compare two realistic market models below:
+- **Model A (Senior Full-Stack Developer)**: Single senior developer contract model. Rate estimated at **₹12,000 / day (~$145/day)**.
+- **Model B (Digital Agency Team)**: Team model including PM, C# Backend Dev, React Dev, UI/UX Designer, and QA. Rate estimated at **₹30,000 / day (~$360/day)**.
+
+### Development Module Cost Breakdown
+
+| Module | Module Name & Scope | Model A (Developer)<br>Cost (₹) | Model B (Agency)<br>Cost (₹) | No. of Days | Complexity |
+| :--- | :--- | :--- | :--- | :---: | :--- |
+| **1** | **Identity, Auth & User Management**<br>ASP.NET Core Identity implementation, JWT token generation, role-based controls (Farmer, Facilitator, Admin). | ₹144,000 | ₹360,000 | 12 | Medium |
+| **2** | **Agro-Met Weather & Warning Engine**<br>C# HostedService background worker for OpenWeatherMap API ingestion, cached forecast store, warning trigger checks. | ₹144,000 | ₹360,000 | 12 | High |
+| **3** | **Agriculture, Soil & Pest CMS**<br>EF Core models for crops, soils, and pests (Agri-PD). CRUD endpoints, file upload to Blob storage, React CMS panels. | ₹216,000 | ₹540,000 | 18 | High |
+| **4** | **Fisheries & Livestock CMS**<br>Database structures for fisheries and livestock disease guides. Search APIs and React layouts. | ₹180,000 | ₹450,000 | 15 | Medium |
+| **5** | **Custom Hiring & Machine Center**<br>Machinery inventory catalog, vendor register system, rental booking state engine, and subsidy calculation modules. | ₹192,000 | ₹480,000 | 16 | High |
+| **6** | **Learning Hub & Groundwater Logs**<br>Multimedia document repository, video/PDF streaming setup, groundwater levels log API, and analytics charts. | ₹144,000 | ₹360,000 | 12 | Medium |
+| **7** | **Facilitator Portal & Geo-Tracking**<br>Field visit logs, GPS coordinates collector API, map rendering using Mapbox, facilitator performance dashboard. | ₹168,000 | ₹420,000 | 14 | High |
+| **8** | **Integrated Communication Gateway**<br>.NET Background Tasks (Hosted Services) queue for bulk SMS/WhatsApp delivery, Firebase push, and AWS SES email templates. | ₹108,000 | ₹270,000 | 9 | Medium |
+| **9** | **System Integration, Security & Deployment**<br>Database migration scripts, EF Core Initial Migrations, API integration tests, and CI/CD pipelines (GitHub Actions). | ₹144,000 | ₹360,000 | 12 | Medium |
+| **Total** | **CapEx Project Development Estimates** | **₹1,440,000** | **₹3,600,000** | **120** | |
+
+> [!NOTE]
+> *Conversion Rate reference: 1 USD ≈ ₹83.00 INR.*
+> - **Total Developer CapEx Cost (Model A)**: **₹1,440,000 INR** (approx. **$17,350 USD**)
+> - **Total Agency CapEx Cost (Model B)**: **₹3,600,000 INR** (approx. **$43,370 USD**)
+
+---
+
+## 3. Operational Infrastructure & API Budget (OpEx)
+
+.NET Core runs natively and highly efficiently on Linux, making hosting very affordable. The monthly budget is computed over a **12-month duration**:
+
+| # | Infrastructure/Service Element | Specifications | Cost/Month (₹) | Total (12 Months - ₹) | Total (12 Months - USD) |
+| :---: | :--- | :--- | :---: | :---: | :---: |
+| **1** | **Application Hosting** | Linux Container App (AWS App Runner or Azure App Service - Linux B1) - .NET Core | ₹3,500 | ₹42,000 | $506 |
+| **2** | **Managed Database** | PostgreSQL on AWS RDS or Azure Database for PostgreSQL (Flexible Server) | ₹5,500 | ₹66,000 | $795 |
+| **3** | **Redis Cache** | Caching API responses, weather forecasts, and session states | ₹1,500 | ₹18,000 | $217 |
+| **4** | **Blob / S3 Storage & CDN** | Media files, PDFs, videos storage + CDN distribution | ₹1,200 | ₹14,400 | $173 |
+| **5** | **SMS Gateway (MSG91/Twilio)** | Transactional alerts and farmer login verification (~30k SMS/month) | ₹5,000 | ₹60,000 | $723 |
+| **6** | **Email Delivery (AWS SES)** | Admin alerts & bulk monthly guides (10k emails/month) | ₹500 | ₹6,000 | $72 |
+| **7** | **Weather API Ingestion** | Premium API key for historical & forecast weather variables | ₹2,500 | ₹30,000 | $361 |
+| **8** | **Mapbox/Google Maps API** | Map pins & tracking logs for facilitator visit routes | ₹1,800 | ₹21,600 | $260 |
+| **9** | **App Monitoring & Logging** | Sentry (C# Integration) + Datadog/Grafana diagnostics | ₹2,000 | ₹24,000 | $289 |
+| **Total** | **OpEx Infrastructure Budget** | | **₹23,500** | **₹282,000** | **$3,396** |
+
+---
+
+## 4. Key Infrastructure Cost Savings with .NET Core
+
+- **Linux Hosting**: Since .NET Core is cross-platform, hosting on **Linux VMs / Linux Containers** avoids Windows Server licensing fees, saving up to 40% on CPU hosting costs.
+- **PostgreSQL vs. MS SQL Server**: Using PostgreSQL as the database engine with EF Core is fully open-source and eliminates expensive SQL Server licensing costs.
+- **Dockerization**: Bundling the ASP.NET Core API and React App into lightweight containers ensures rapid, easy deployments to low-cost cloud services (like DigitalOcean, AWS ECS, or Azure Container Apps).

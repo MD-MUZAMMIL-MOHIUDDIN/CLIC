@@ -313,3 +313,32 @@ a:hover { color: var(--color-mint); }
   border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-md) !important;
 }
+
+/* ── Responsive Mobile Overrides (under 1024px) ── */
+@media (max-width: 1023px) {
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: var(--header-height);
+  }
+  .page-wrapper {
+    padding: var(--space-4) !important;
+    max-width: 100% !important;
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 90;
+    animation: fadeIn 0.25s ease-out;
+  }
+}
+
+/* Hide Sidebar on Desktop for Farmers (who use Top Nav instead) */
+@media (min-width: 1024px) {
+  .farmer-layout .sidebar {
+    display: none !important;
+  }
+}
+

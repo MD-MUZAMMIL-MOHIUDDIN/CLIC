@@ -5,7 +5,7 @@ import {
   LayoutDashboard, CloudRain, Sprout, BookOpen,
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, X
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
@@ -71,7 +71,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -102,7 +102,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   };
 
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
@@ -114,6 +114,9 @@ export default function Sidebar({ collapsed, onToggle }) {
             <span className="sidebar-sub">PJK Agriculture</span>
           </div>
         )}
+        <button className="mobile-close-btn" onClick={onClose} aria-label="Close sidebar">
+          <X size={18} />
+        </button>
       </div>
 
       {/* User Card */}
