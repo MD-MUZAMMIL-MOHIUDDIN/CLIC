@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Leaf, Eye, EyeOff, CloudRain, Sprout } from 'lucide-react';
+import { Leaf, Eye, EyeOff, CloudRain, Sprout, Phone, Mail } from 'lucide-react';
 import '../styles/login.css';
 
 const DEMO_CREDENTIALS = [
-  { role: 'Farmer', email: 'farmer@clic.in', password: 'clic@2025', icon: '👨‍🌾', desc: 'Simplified info view' },
-  { role: 'Facilitator', email: 'facilitator@clic.in', password: 'clic@2025', icon: '👨‍💼', desc: 'Data entry & walk-in desk' },
-  { role: 'Admin', email: 'management@clic.in', password: 'clic@2025', icon: '🏛️', desc: 'Full admin & onboarding' },
-  { role: 'CHC Hub', email: 'chc@clic.in', password: 'clic@2025', icon: '🚜', desc: 'Fleet dispatch & rental logs' },
-  { role: 'FMC Shop', email: 'fmc@clic.in', password: 'clic@2025', icon: '🏪', desc: 'Dealer stock & subsidies' },
+  { role: 'SuperAdmin', phone: '9999900000', email: 'superadmin@clic.in', password: 'clic@2025', icon: '👑', desc: 'Mobile: 9999900000' },
+  { role: 'Admin', phone: '9848099000', email: 'management@clic.in', password: 'clic@2025', icon: '🏛️', desc: 'Mobile: 9848099000' },
+  { role: 'Facilitator', phone: '9848011223', email: 'facilitator@clic.in', password: 'clic@2025', icon: '👨‍💼', desc: 'Mobile: 9848011223' },
+  { role: 'Farmer', phone: '9876543210', email: 'farmer@clic.in', password: 'clic@2025', icon: '👨‍🌾', desc: 'Mobile: 9876543210' },
+  { role: 'CHC Hub', phone: '9876500112', email: 'chc@clic.in', password: 'clic@2025', icon: '🚜', desc: 'Mobile: 9876500112' },
+  { role: 'FMC Shop', phone: '9440188772', email: 'fmc@clic.in', password: 'clic@2025', icon: '🏪', desc: 'Mobile: 9440188772' },
 ];
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
@@ -25,10 +26,12 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 600));
-    const result = login(email, password);
+    await new Promise(r => setTimeout(r, 400));
+    const result = login(identifier, password);
     if (result.success) {
-      if (result.user?.role === 'chc_operator') {
+      if (result.user?.role === 'superadmin' || result.user?.role === 'management') {
+        navigate('/admin');
+      } else if (result.user?.role === 'chc_operator') {
         navigate('/chc-portal');
       } else if (result.user?.role === 'fmc_dealer') {
         navigate('/fmc-portal');
@@ -41,8 +44,8 @@ export default function Login() {
     }
   };
 
-  const quickLogin = (cred) => {
-    setEmail(cred.email);
+  const quickLogin = (cred, usePhone = true) => {
+    setIdentifier(usePhone ? cred.phone : cred.email);
     setPassword(cred.password);
   };
 
@@ -91,15 +94,17 @@ export default function Login() {
         <div className="login-right glass-card">
           <div className="login-form-header">
             <h2>Welcome Back</h2>
-            <p>Sign in to access your CLIC dashboard</p>
+            <p>Sign in with your <strong>Mobile Number</strong> or <strong>Email</strong></p>
           </div>
 
           {/* Demo quick-login */}
           <div className="demo-roles">
-            <p className="demo-label">Demo Accounts (click to fill):</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <p className="demo-label" style={{ margin: 0 }}>Quick Demo Login (Click to fill):</p>
+            </div>
             <div className="demo-role-cards">
               {DEMO_CREDENTIALS.map(c => (
-                <button key={c.role} className="demo-role-card" onClick={() => quickLogin(c)}>
+                <button key={c.role} className="demo-role-card" onClick={() => quickLogin(c, true)}>
                   <span className="role-icon">{c.icon}</span>
                   <div>
                     <div className="role-name">{c.role}</div>
@@ -112,14 +117,17 @@ export default function Login() {
 
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="form-group">
-              <label htmlFor="login-email">Email Address</label>
+              <label htmlFor="login-identifier" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>Mobile Number / Email Address</span>
+                <span style={{ fontSize: '11px', color: 'var(--color-mint)', fontWeight: 'bold' }}>📱 Mobile or ✉️ Mail</span>
+              </label>
               <input
-                id="login-email"
-                type="email"
+                id="login-identifier"
+                type="text"
                 className="input-field"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="your@email.com"
+                value={identifier}
+                onChange={e => setIdentifier(e.target.value)}
+                placeholder="e.g. 9876543210 or farmer@clic.in"
                 required
               />
             </div>

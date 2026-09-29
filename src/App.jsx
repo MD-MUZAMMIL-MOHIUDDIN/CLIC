@@ -15,6 +15,7 @@ import Locations from './pages/Locations';
 import FarmMachinery from './pages/FarmMachinery';
 import CHCPortal from './pages/CHCPortal';
 import FMCPortal from './pages/FMCPortal';
+import AdminPortal from './pages/AdminPortal';
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
+            <Route path="admin" element={<AdminPortal />} />
             <Route path="machinery" element={<FarmMachinery />} />
             <Route path="farm-machinery" element={<FarmMachinery />} />
             <Route path="chc-portal" element={<CHCPortal />} />

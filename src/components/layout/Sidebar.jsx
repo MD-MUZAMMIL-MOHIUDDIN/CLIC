@@ -5,12 +5,22 @@ import {
   LayoutDashboard, CloudRain, Sprout, BookOpen,
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
-  ChevronDown, ChevronUp, X, Tractor, Store, Wrench
+  ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
 const NAV_ITEMS = [
   { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management','chc_operator','fmc_dealer'] },
+  { 
+    path: '/admin',       
+    label: 'Admin Console',  
+    icon: <ShieldCheck size={20}/>,      
+    roles: ['management'],
+    submenus: [
+      { path: '/admin?tab=users', label: 'Users', roles: ['management'] },
+      { path: '/admin?tab=roles', label: 'Roles', roles: ['management'] }
+    ]
+  },
   { 
     path: '/machinery',   
     label: 'Facilitator Desk', 
@@ -25,13 +35,13 @@ const NAV_ITEMS = [
   },
   {
     path: '/chc-portal',
-    label: 'CHC Hub Portal',
+    label: 'CHC Hub',
     icon: <Wrench size={20}/>,
     roles: ['chc_operator','facilitator','management']
   },
   {
     path: '/fmc-portal',
-    label: 'FMC Dealer Portal',
+    label: 'FMC Dealer',
     icon: <Store size={20}/>,
     roles: ['fmc_dealer','facilitator','management']
   },
@@ -102,7 +112,8 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
 
   const [openMenus, setOpenMenus] = useState({});
 
-  const visibleItems = NAV_ITEMS.filter(item => !user || item.roles.includes(user.role));
+  const isSuperAdmin = user && (user.role === 'superadmin' || user.roles?.includes('superadmin'));
+  const visibleItems = NAV_ITEMS.filter(item => !user || isSuperAdmin || item.roles.includes(user.role) || (user.roles && user.roles.some(r => item.roles.includes(r))));
 
   // Sync open dropdowns on mount and route change
   useEffect(() => {
@@ -165,7 +176,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
         {visibleItems.map(item => {
           const isParentActive = location.pathname === item.path;
           const hasSubs = item.submenus && item.submenus.length > 0;
-          const visibleSubs = hasSubs ? item.submenus.filter(sub => !user || sub.roles.includes(user.role)) : [];
+          const visibleSubs = hasSubs ? item.submenus.filter(sub => !user || isSuperAdmin || sub.roles.includes(user.role) || (user.roles && user.roles.some(r => sub.roles.includes(r)))) : [];
 
           return (
             <div key={item.path} className="sidebar-menu-group" style={{ display: 'flex', flexDirection: 'column' }}>
