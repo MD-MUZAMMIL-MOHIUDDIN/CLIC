@@ -12,6 +12,10 @@ import FacilitatorPortal from './pages/FacilitatorPortal';
 import Groundwater from './pages/Groundwater';
 import Locations from './pages/Locations';
 
+import FarmMachinery from './pages/FarmMachinery';
+import CHCPortal from './pages/CHCPortal';
+import FMCPortal from './pages/FMCPortal';
+
 export default function App() {
   return (
     <AuthProvider>
@@ -20,6 +24,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Dashboard />} />
+            <Route path="machinery" element={<FarmMachinery />} />
+            <Route path="farm-machinery" element={<FarmMachinery />} />
+            <Route path="chc-portal" element={<CHCPortal />} />
+            <Route path="fmc-portal" element={<FMCPortal />} />
             <Route path="weather" element={<Weather />} />
             <Route path="advisory" element={<Advisory />} />
             <Route path="groundwater" element={<Groundwater />} />

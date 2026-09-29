@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
-import { CloudRain, Droplets, Users, Upload, CheckCircle, Plus } from 'lucide-react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { CloudRain, Droplets, Users, Upload, CheckCircle, Plus, Tractor, ArrowRight, UserPlus, FileQuestion } from 'lucide-react';
+import { defaultStates, defaultDistricts, defaultVillages } from '../data/marketData';
+import { DEMO_FARMERS, INITIAL_FARMER_QUERIES } from '../data/machineryData';
 import '../styles/facilitator.css';
 
 const VILLAGE_DATA = [
@@ -30,16 +32,218 @@ export default function FacilitatorPortal() {
 }
 
 function FacilitatorContent() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('rainfall');
   const [submitted, setSubmitted] = useState(false);
+  const [submittedFarmer, setSubmittedFarmer] = useState(null);
+  
   const [rainfallForm, setRainfallForm] = useState({ village:'', date:'', rainfall:'', gauge:'Manual', observer:'', notes:'' });
   const [gwForm, setGwForm] = useState({ village:'', date:'', depth:'', unit:'mbgl', wellId:'', method:'Measuring tape' });
-  const [farmerForm, setFarmerForm] = useState({ name:'', telugu:'', village:'', phone:'', aadhaar:'', landholding:'', crops:'', bankAccount:'' });
+  
+  // Location Cascades for Farmer Form
+  const [states] = useState(() => {
+    const saved = localStorage.getItem('clic_states');
+    return saved ? JSON.parse(saved) : defaultStates;
+  });
+  const [districts] = useState(() => {
+    const saved = localStorage.getItem('clic_districts');
+    return saved ? JSON.parse(saved) : defaultDistricts;
+  });
+  const [villages, setVillages] = useState(() => {
+    const saved = localStorage.getItem('clic_market_villages');
+    return saved ? JSON.parse(saved) : defaultVillages;
+  });
+
+  const [farmerForm, setFarmerForm] = useState({
+    name: '',
+    telugu: '',
+    phone: '',
+    state: 'Telangana',
+    districtId: 'd1',
+    districtName: 'Nalgonda',
+    villageId: 'v1',
+    villageName: 'Chandampet',
+    isCustomVillage: false,
+    customVillageName: '',
+    landholding: '3.0',
+    soilType: 'Red Sandy Loam',
+    crops: '',
+    bankAccount: '',
+    subsidyCategory: 'Small / Marginal Farmer (SF/MF)',
+    query: ''
+  });
+
+  const existingFarmerWithPhone = useMemo(() => {
+    const raw = (farmerForm.phone || '').trim().replace(/\D/g, '');
+    if (!raw || raw.length < 10) return null;
+    return farmers.find(f => f.phone && f.phone.replace(/\D/g, '') === raw) || null;
+  }, [farmerForm.phone, farmers]);
+
+  const handleStateChange = (newState) => {
+    const stateDists = districts.filter(d => d.state === newState);
+    const firstDist = stateDists[0] || { id: '', name: '' };
+    const distVils = villages.filter(v => v.districtId === firstDist.id);
+    const firstVil = distVils[0] || { id: '', name: '' };
+
+    setFarmerForm(prev => ({
+      ...prev,
+      state: newState,
+      districtId: firstDist.id,
+      districtName: firstDist.name,
+      villageId: firstVil.id,
+      villageName: firstVil.name,
+      isCustomVillage: false,
+      customVillageName: ''
+    }));
+  };
+
+  const handleDistrictChange = (newDistId) => {
+    const distObj = districts.find(d => d.id === newDistId);
+    const distVils = villages.filter(v => v.districtId === newDistId);
+    const firstVil = distVils[0] || { id: '', name: '' };
+
+    setFarmerForm(prev => ({
+      ...prev,
+      districtId: newDistId,
+      districtName: distObj?.name || '',
+      villageId: firstVil.id,
+      villageName: firstVil.name,
+      isCustomVillage: false,
+      customVillageName: ''
+    }));
+  };
+
+  const handleVillageChange = (newVilId) => {
+    if (newVilId === '__other__') {
+      setFarmerForm(prev => ({
+        ...prev,
+        villageId: '__other__',
+        villageName: 'Other',
+        isCustomVillage: true
+      }));
+    } else {
+      const vilObj = villages.find(v => v.id === newVilId);
+      setFarmerForm(prev => ({
+        ...prev,
+        villageId: newVilId,
+        villageName: vilObj?.name || '',
+        isCustomVillage: false
+      }));
+    }
+  };
 
   const handleSubmit = (e, form, setForm, defaults) => {
     e.preventDefault();
     setSubmitted(true);
     setTimeout(() => { setSubmitted(false); setForm(defaults); }, 3000);
+  };
+
+  const handleFarmerSubmit = (e) => {
+    e.preventDefault();
+    if (!farmerForm.name.trim() || !farmerForm.phone.trim()) {
+      alert('Please provide Farmer Name and Mobile Number.');
+      return;
+    }
+
+    const finalVillage = farmerForm.isCustomVillage
+      ? (farmerForm.customVillageName.trim() || 'Custom Village')
+      : farmerForm.villageName;
+
+    if (farmerForm.isCustomVillage && farmerForm.customVillageName.trim()) {
+      const newVil = {
+        id: `v-${Date.now()}`,
+        name: farmerForm.customVillageName.trim(),
+        districtId: farmerForm.districtId
+      };
+      const updatedVils = [...villages, newVil];
+      setVillages(updatedVils);
+      localStorage.setItem('clic_market_villages', JSON.stringify(updatedVils));
+    }
+
+    // Mobile as Primary Key & duplicate check
+    const cleanPhone = farmerForm.phone.trim().replace(/\D/g, '');
+    const duplicate = farmers.find(f => f.phone && f.phone.replace(/\D/g, '') === cleanPhone);
+    if (duplicate) {
+      alert(`Farmer with mobile number +91 ${cleanPhone} already exists as ${duplicate.name}. Cannot add duplicate.`);
+      return;
+    }
+
+    const newFarmer = {
+      id: `f-${cleanPhone}`,
+      name: farmerForm.name.trim(),
+      telugu: farmerForm.telugu.trim() || farmerForm.name.trim(),
+      state: farmerForm.state,
+      district: farmerForm.districtName,
+      village: finalVillage,
+      phone: cleanPhone,
+      landHolding: `${farmerForm.landholding} acres`,
+      soilType: farmerForm.soilType || 'Red Sandy Loam',
+      crops: farmerForm.crops ? farmerForm.crops.split(',').map(c => c.trim()).filter(Boolean) : ['Paddy', 'Cotton'],
+      bankAccount: farmerForm.bankAccount.trim() || 'SBI - Main Branch',
+      subsidyCategory: farmerForm.subsidyCategory || 'Small / Marginal Farmer (SF/MF)',
+      activeQuery: farmerForm.query.trim() || 'Walk-in farmer registration at CLIC Hub'
+    };
+
+    // Save to clic_farmers
+    const savedFarmers = JSON.parse(localStorage.getItem('clic_farmers') || '[]');
+    const existingList = savedFarmers.length > 0 ? savedFarmers : DEMO_FARMERS;
+    const updatedFarmers = [newFarmer, ...existingList];
+    localStorage.setItem('clic_farmers', JSON.stringify(updatedFarmers));
+
+    // If query given, save to clic_farmer_queries
+    if (farmerForm.query.trim()) {
+      const currentTimestamp = new Date().toLocaleString('en-IN', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true
+      });
+      const facName = user?.name || 'CLIC Facilitator';
+      const qRecord = {
+        id: `QRY-${Date.now().toString().slice(-6)}`,
+        farmerId: newFarmer.id,
+        farmerName: newFarmer.name,
+        farmerPhone: newFarmer.phone,
+        village: newFarmer.village,
+        district: newFarmer.district,
+        state: newFarmer.state,
+        query: farmerForm.query.trim(),
+        facilitatorId: user?.id || 'fac-lead',
+        facilitatorName: facName,
+        facilitatorEmail: user?.email || 'facilitator@clic.in',
+        facilitatorRole: user?.role || 'facilitator',
+        timestamp: currentTimestamp,
+        theme: 'Farm Machinery',
+        status: 'Logged',
+        notes: 'Captured during farmer registration in Facilitator Portal'
+      };
+      const savedQueries = JSON.parse(localStorage.getItem('clic_farmer_queries') || '[]');
+      const existingQueries = savedQueries.length > 0 ? savedQueries : INITIAL_FARMER_QUERIES;
+      localStorage.setItem('clic_farmer_queries', JSON.stringify([qRecord, ...existingQueries]));
+    }
+
+    setSubmittedFarmer(newFarmer);
+    setSubmitted(true);
+    setTimeout(() => {
+      setSubmitted(false);
+      setFarmerForm({
+        name: '',
+        telugu: '',
+        phone: '',
+        aadhaar: '',
+        state: 'Telangana',
+        districtId: 'd1',
+        districtName: 'Nalgonda',
+        villageId: 'v1',
+        villageName: 'Chandampet',
+        isCustomVillage: false,
+        customVillageName: '',
+        landholding: '3.0',
+        soilType: 'Red Sandy Loam',
+        crops: '',
+        bankAccount: '',
+        subsidyCategory: 'Small / Marginal Farmer (SF/MF)',
+        query: ''
+      });
+    }, 4000);
   };
 
   return (
@@ -49,7 +253,7 @@ function FacilitatorContent() {
           <h1>👨‍💼 Facilitator Portal</h1>
           <p className="text-secondary">Data entry and management for CLIC village-level observations</p>
         </div>
-        <div className="badge badge-sky">Logged in as Facilitator</div>
+        <div className="badge badge-sky">Logged in as Facilitator ({user?.name || 'CLIC Lead'})</div>
       </div>
 
       {/* Section Nav */}
@@ -65,11 +269,52 @@ function FacilitatorContent() {
             {s.icon} {s.label}
           </button>
         ))}
+        <button
+          className="facilitator-nav-btn"
+          style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(5, 150, 105, 0.1))', color: 'var(--color-forest)', fontWeight: 'bold' }}
+          onClick={() => navigate('/machinery')}
+        >
+          <Tractor size={18} /> 🚜 Farm Machinery Desk
+        </button>
+      </div>
+
+      {/* Walk-in Machinery Fast Banner */}
+      <div className="card" style={{ background: 'linear-gradient(135deg, #1E293B, #0F172A)', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-3)', padding: 'var(--space-4) var(--space-5)', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px' }}>
+            🚜
+          </div>
+          <div>
+            <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 'bold', margin: 0, color: '#fff' }}>
+              Farmer Walk-in Machinery Workflow
+            </h4>
+            <p style={{ fontSize: 'var(--text-xs)', color: '#94A3B8', margin: '2px 0 0 0' }}>
+              Standardized CLIC Pipeline: Farmer Query → Retrieve Profile → Operations Catalog → Video/Specs → FM Shop Purchase / CHC Rental Alerts.
+            </p>
+          </div>
+        </div>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => navigate('/machinery')}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+        >
+          Launch Walk-in Desk <ArrowRight size={14} />
+        </button>
       </div>
 
       {submitted && (
         <div className="submit-success">
-          <CheckCircle size={20}/> Data submitted successfully! Synced to CLIC database.
+          <CheckCircle size={20}/>
+          <span>Data submitted successfully! Synced to CLIC database.</span>
+          {submittedFarmer && (
+            <button
+              className="btn btn-primary btn-sm"
+              style={{ marginLeft: '12px', fontSize: '11px' }}
+              onClick={() => navigate('/machinery')}
+            >
+              Open in Walk-in Desk <ArrowRight size={12} />
+            </button>
+          )}
         </div>
       )}
 
@@ -158,49 +403,153 @@ function FacilitatorContent() {
         </div>
       )}
 
-      {/* Farmer Registration */}
+      {/* Farmer Registration with State -> District -> Village Selection */}
       {activeSection === 'farmer' && (
         <div className="facilitator-form-card card">
-          <div className="section-title"><Users size={20}/> Farmer Registration</div>
+          <div className="section-title"><Users size={20}/> Farmer Registration (రైతు నమోదు)</div>
           <p className="text-secondary" style={{ marginBottom:'var(--space-6)', fontSize:'var(--text-sm)' }}>
-            Register new farmers in CLIC database. All fields support Telugu/Hindi Unicode input.
+            Register new walk-in farmers into the CLIC master registry with State → District → Village cascading hierarchy and query logging.
           </p>
-          <form onSubmit={e => handleSubmit(e, farmerForm, setFarmerForm, { name:'', telugu:'', village:'', phone:'', aadhaar:'', landholding:'', crops:'', bankAccount:'' })}>
+          <form onSubmit={handleFarmerSubmit}>
             <div className="form-grid">
               <div className="form-group">
-                <label>Farmer Name (English)</label>
+                <label>Farmer Name (English) *</label>
                 <input className="input-field" placeholder="Full name" value={farmerForm.name} onChange={e=>setFarmerForm({...farmerForm, name:e.target.value})} required />
               </div>
               <div className="form-group">
                 <label>Name in Telugu (తెలుగులో పేరు)</label>
-                <input className="input-field" placeholder="e.g. రాము రెడ్డి" value={farmerForm.telugu} onChange={e=>setFarmerForm({...farmerForm, telugu:e.target.value})} style={{ fontFamily:'var(--font-telugu)' }} />
+                <input className="input-field" placeholder="ఉదా. రాము రెడ్డి" value={farmerForm.telugu} onChange={e=>setFarmerForm({...farmerForm, telugu:e.target.value})} style={{ fontFamily:'var(--font-telugu)' }} />
               </div>
               <div className="form-group">
-                <label>Village (గ్రామం)</label>
-                <input className="input-field" placeholder="Village name" value={farmerForm.village} onChange={e=>setFarmerForm({...farmerForm, village:e.target.value})} required />
+                <label>Mobile Number (10 digits) *</label>
+                <input type="tel" maxLength={10} className="input-field" placeholder="10-digit mobile number" value={farmerForm.phone} onChange={e=>setFarmerForm({...farmerForm, phone:e.target.value.replace(/\D/g,'')})} required />
               </div>
+
+              {/* ── LOCATION SELECTION: State -> District -> Village ── */}
               <div className="form-group">
-                <label>Mobile Number</label>
-                <input type="tel" className="input-field" placeholder="10-digit mobile" value={farmerForm.phone} onChange={e=>setFarmerForm({...farmerForm, phone:e.target.value})} required />
+                <label>State (రాష్ట్రం) *</label>
+                <select
+                  className="input-field select-field"
+                  value={farmerForm.state}
+                  onChange={e => handleStateChange(e.target.value)}
+                  required
+                >
+                  {states.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
               </div>
+
               <div className="form-group">
-                <label>Aadhaar Number (Last 4 digits)</label>
-                <input type="text" maxLength={4} className="input-field" placeholder="XXXX" value={farmerForm.aadhaar} onChange={e=>setFarmerForm({...farmerForm, aadhaar:e.target.value})} />
+                <label>District (జిల్లా) *</label>
+                <select
+                  className="input-field select-field"
+                  value={farmerForm.districtId}
+                  onChange={e => handleDistrictChange(e.target.value)}
+                  required
+                >
+                  {districts
+                    .filter(d => d.state === farmerForm.state)
+                    .map(d => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                </select>
               </div>
+
+              <div className="form-group" style={{ gridColumn: farmerForm.isCustomVillage ? 'auto' : 'span 2' }}>
+                <label>Village (గ్రామం) *</label>
+                <select
+                  className="input-field select-field"
+                  value={farmerForm.villageId}
+                  onChange={e => handleVillageChange(e.target.value)}
+                  required
+                >
+                  {villages
+                    .filter(v => v.districtId === farmerForm.districtId)
+                    .map(v => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  <option value="__other__">+ Enter Other Village...</option>
+                </select>
+              </div>
+
+              {farmerForm.isCustomVillage && (
+                <div className="form-group">
+                  <label>Enter Village Name *</label>
+                  <input
+                    className="input-field"
+                    placeholder="Type village name"
+                    value={farmerForm.customVillageName}
+                    onChange={e => setFarmerForm({ ...farmerForm, customVillageName: e.target.value })}
+                    required
+                  />
+                </div>
+              )}
+
               <div className="form-group">
                 <label>Land Holding (acres)</label>
                 <input type="number" step="0.5" min="0" className="input-field" placeholder="e.g. 3.5" value={farmerForm.landholding} onChange={e=>setFarmerForm({...farmerForm, landholding:e.target.value})} />
               </div>
+
+              <div className="form-group">
+                <label>Soil Type</label>
+                <select className="input-field select-field" value={farmerForm.soilType} onChange={e=>setFarmerForm({...farmerForm, soilType:e.target.value})}>
+                  <option value="Red Sandy Loam">Red Sandy Loam</option>
+                  <option value="Black Cotton Soil">Black Cotton Soil</option>
+                  <option value="Red Loam">Red Loam</option>
+                  <option value="Clay Loam">Clay Loam</option>
+                  <option value="Alluvial Soil">Alluvial Soil</option>
+                </select>
+              </div>
+
               <div className="form-group" style={{ gridColumn:'1/-1' }}>
                 <label>Main Crops (పంటలు)</label>
                 <input className="input-field" placeholder="e.g. Paddy, Cotton, Red Gram / వరి, పత్తి, కందులు" value={farmerForm.crops} onChange={e=>setFarmerForm({...farmerForm, crops:e.target.value})} style={{ fontFamily:'var(--font-telugu)' }} />
               </div>
+
               <div className="form-group" style={{ gridColumn:'1/-1' }}>
-                <label>Bank Account (for schemes)</label>
+                <label>Farmer Subsidy Category</label>
+                <select className="input-field select-field" value={farmerForm.subsidyCategory} onChange={e=>setFarmerForm({...farmerForm, subsidyCategory:e.target.value})}>
+                  <option value="Small / Marginal Farmer (SF/MF)">Small / Marginal Farmer (SF/MF) - 40% Subsidy</option>
+                  <option value="Women Farmer / SHG (Priority 50% Subsidy)">Women Farmer / SHG (Priority 50% Subsidy)</option>
+                  <option value="SC/ST Category (Special 50% Subsidy)">SC/ST Category (Special 50% Subsidy)</option>
+                  <option value="General Farmer">General Farmer - 30% Subsidy</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ gridColumn:'1/-1' }}>
+                <label>Bank Account (for schemes & DBT)</label>
                 <input className="input-field" placeholder="Account number (optional)" value={farmerForm.bankAccount} onChange={e=>setFarmerForm({...farmerForm, bankAccount:e.target.value})} />
               </div>
+
+              <div className="form-group" style={{ gridColumn:'1/-1' }}>
+                <label>Initial Walk-in Machinery Requirement / Query (Optional)</label>
+                <textarea
+                  className="input-field"
+                  rows={2}
+                  placeholder="e.g. Looking for combine harvester booking or power sprayer"
+                  value={farmerForm.query}
+                  onChange={e => setFarmerForm({ ...farmerForm, query: e.target.value })}
+                />
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary btn-lg">Register Farmer</button>
+            {existingFarmerWithPhone && (
+              <div style={{ color: '#b91c1c', fontWeight: 'bold', fontSize: '12px', marginTop: 'var(--space-2)' }}>
+                ⛔ Cannot register: Mobile number is already registered to {existingFarmerWithPhone.name} ({existingFarmerWithPhone.village}).
+              </div>
+            )}
+            <button
+              type="submit"
+              className="btn btn-primary btn-lg"
+              disabled={Boolean(existingFarmerWithPhone) || farmerForm.phone.length !== 10 || !farmerForm.name.trim()}
+              style={{
+                marginTop: 'var(--space-3)',
+                opacity: (existingFarmerWithPhone || farmerForm.phone.length !== 10 || !farmerForm.name.trim()) ? 0.45 : 1,
+                cursor: (existingFarmerWithPhone || farmerForm.phone.length !== 10 || !farmerForm.name.trim()) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              Register Farmer & Sync to CLIC
+            </button>
           </form>
         </div>
       )}

@@ -131,10 +131,14 @@ export default function Dashboard() {
                 <p>Apply for subsidies, crop insurance & financial support</p>
               </button>
 
-              <button className="ops-btn btn-amber" onClick={() => navigate('/market')}>
+              <button className="ops-btn btn-amber" onClick={() => {
+                if (user?.role === 'chc_operator') navigate('/chc-portal');
+                else if (user?.role === 'fmc_dealer') navigate('/fmc-portal');
+                else navigate('/machinery');
+              }}>
                 <div className="ops-icon-container"><Tractor size={20} /></div>
-                <h4>Custom Hiring Center (CHC)</h4>
-                <p>Rent tractors and harvesters from local operators</p>
+                <h4>{user?.role === 'chc_operator' ? 'CHC Fleet Console' : user?.role === 'fmc_dealer' ? 'FMC Dealer Console' : 'Farm Machinery Desk'}</h4>
+                <p>{user?.role === 'chc_operator' ? 'Register fleet machines & confirm walk-in rental alerts' : user?.role === 'fmc_dealer' ? 'Register machine models & confirm purchase work orders' : 'Walk-in workflow, equipment hire, purchase & live alerts'}</p>
               </button>
 
               <button className="ops-btn btn-soil" onClick={() => navigate('/learning')}>

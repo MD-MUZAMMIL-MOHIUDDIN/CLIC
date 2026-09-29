@@ -5,12 +5,36 @@ import {
   LayoutDashboard, CloudRain, Sprout, BookOpen,
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
-  ChevronDown, ChevronUp, X
+  ChevronDown, ChevronUp, X, Tractor, Store, Wrench
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
 const NAV_ITEMS = [
-  { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management'] },
+  { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management','chc_operator','fmc_dealer'] },
+  { 
+    path: '/machinery',   
+    label: 'Facilitator Desk', 
+    icon: <Tractor size={20}/>,          
+    roles: ['facilitator','management'],
+    submenus: [
+      { path: '/machinery?tab=workflow', label: 'Walk-in Workflow (6-Step)', roles: ['facilitator','management'] },
+      { path: '/machinery?tab=orders', label: 'All Orders & Bookings', roles: ['facilitator','management'] },
+      { path: '/machinery?tab=alerts', label: 'Workflow Alerts Feed', roles: ['facilitator','management'] },
+      { path: '/machinery?tab=onboarding', label: '🏛️ Onboard CHC & FMC', roles: ['facilitator','management'] }
+    ]
+  },
+  {
+    path: '/chc-portal',
+    label: 'CHC Hub Portal',
+    icon: <Wrench size={20}/>,
+    roles: ['chc_operator','facilitator','management']
+  },
+  {
+    path: '/fmc-portal',
+    label: 'FMC Dealer Portal',
+    icon: <Store size={20}/>,
+    roles: ['fmc_dealer','facilitator','management']
+  },
   { 
     path: '/advisory',    
     label: 'Advisory',        

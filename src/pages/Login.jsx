@@ -6,8 +6,10 @@ import '../styles/login.css';
 
 const DEMO_CREDENTIALS = [
   { role: 'Farmer', email: 'farmer@clic.in', password: 'clic@2025', icon: '👨‍🌾', desc: 'Simplified info view' },
-  { role: 'Facilitator', email: 'facilitator@clic.in', password: 'clic@2025', icon: '👨‍💼', desc: 'Data entry & management' },
-  { role: 'Management', email: 'management@clic.in', password: 'clic@2025', icon: '🏛️', desc: 'Full admin access' },
+  { role: 'Facilitator', email: 'facilitator@clic.in', password: 'clic@2025', icon: '👨‍💼', desc: 'Data entry & walk-in desk' },
+  { role: 'Admin', email: 'management@clic.in', password: 'clic@2025', icon: '🏛️', desc: 'Full admin & onboarding' },
+  { role: 'CHC Hub', email: 'chc@clic.in', password: 'clic@2025', icon: '🚜', desc: 'Fleet dispatch & rental logs' },
+  { role: 'FMC Shop', email: 'fmc@clic.in', password: 'clic@2025', icon: '🏪', desc: 'Dealer stock & subsidies' },
 ];
 
 export default function Login() {
@@ -25,8 +27,18 @@ export default function Login() {
     setError('');
     await new Promise(r => setTimeout(r, 600));
     const result = login(email, password);
-    if (result.success) navigate('/');
-    else { setError(result.error); setLoading(false); }
+    if (result.success) {
+      if (result.user?.role === 'chc_operator') {
+        navigate('/chc-portal');
+      } else if (result.user?.role === 'fmc_dealer') {
+        navigate('/fmc-portal');
+      } else {
+        navigate('/');
+      }
+    } else {
+      setError(result.error);
+      setLoading(false);
+    }
   };
 
   const quickLogin = (cred) => {
