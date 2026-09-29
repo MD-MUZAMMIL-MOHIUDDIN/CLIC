@@ -9,27 +9,17 @@ import {
   defaultCommodities,
   defaultVillagePrices,
   markets,
-  chcEquipment,
   inputStore
 } from '../data/marketData';
 import {
-  TrendingUp, TrendingDown, Minus, Search, ShoppingBag, Tractor,
+  TrendingUp, TrendingDown, Minus, Search,
   Leaf, Zap, Wind, Settings, CircleDot, Droplets, MinimizeIcon,
-  Plus, Trash2, Edit2, Save, MapPin
+  Plus, Trash2, Edit2, Save, MapPin, CheckCircle, Clock, ShieldCheck, User, Phone, Calendar,
+  Building2, Award, FileText, Send, Sparkles, AlertCircle
 } from 'lucide-react';
 import '../styles/market.css';
 
-const TABS = ['Market Prices', 'Equipment Hire (CHC)', 'Input Store'];
-const iconMap = {
-  tractor: <Tractor size={24} />,
-  leaf: <Leaf size={24} />,
-  settings: <Settings size={24} />,
-  zap: <Zap size={24} />,
-  wind: <Wind size={24} />,
-  'circle-dot': <CircleDot size={24} />,
-  droplets: <Droplets size={24} />,
-  'minimize-2': <MinimizeIcon size={24} />
-};
+const TABS = ['Market Prices', 'Input Store'];
 
 export default function Market() {
   const { user } = useAuth();
@@ -52,9 +42,7 @@ export default function Market() {
   const [districts, setDistricts] = useState([]);
   const [villages, setVillages] = useState([]);
   const [commodities, setCommodities] = useState([]);
-
   const [villagePrices, setVillagePrices] = useState([]);
-  const [equipmentList, setEquipmentList] = useState([]);
   const [inputProducts, setInputProducts] = useState([]);
 
   // Load from localStorage or fallback to seeds
@@ -104,15 +92,6 @@ export default function Market() {
       localStorage.setItem('clic_village_prices', JSON.stringify(defaultVillagePrices));
     }
 
-    // Equipment
-    const savedChc = localStorage.getItem('clic_chc_equipment');
-    if (savedChc) {
-      try { setEquipmentList(JSON.parse(savedChc)); } catch { setEquipmentList(chcEquipment); }
-    } else {
-      setEquipmentList(chcEquipment);
-      localStorage.setItem('clic_chc_equipment', JSON.stringify(chcEquipment));
-    }
-
     // Store products
     const savedStore = localStorage.getItem('clic_input_store');
     if (savedStore) {
@@ -133,24 +112,19 @@ export default function Market() {
     localStorage.setItem('clic_village_prices', JSON.stringify(updated));
   };
 
-  const saveEquipment = (updated) => {
-    setEquipmentList(updated);
-    localStorage.setItem('clic_chc_equipment', JSON.stringify(updated));
-  };
-
   const saveProducts = (updated) => {
     setInputProducts(updated);
     localStorage.setItem('clic_input_store', JSON.stringify(updated));
   };
 
-  const canManage = user?.role === 'facilitator' || user?.role === 'management';
+  const canManage = user?.role === 'facilitator' || user?.role === 'management' || user?.role === 'admin';
   const visibleTabs = canManage ? [...TABS, '🔧 Manage Business'] : TABS;
 
   return (
     <div className="market-page">
       <div className="page-header animate-fade-in-up">
-        <h1>🛒 Market & Business Services</h1>
-        <p className="text-secondary">Live APMC rates, village-level commodity pricing, CHC equipment, and input ordering.</p>
+        <h1>🛒 Market & Input Store</h1>
+        <p className="text-secondary">Live APMC commodity rates, village-level market buying prices, and agro-input ordering.</p>
       </div>
 
       <div className="market-tabs animate-fade-in-up" style={{ animationDelay: '50ms' }}>
@@ -174,9 +148,6 @@ export default function Market() {
             villagePrices={villagePrices}
           />
         )}
-        {activeTab === 'Equipment Hire (CHC)' && (
-          <CHCView equipmentList={equipmentList} />
-        )}
         {activeTab === 'Input Store' && (
           <InputStoreView inputProducts={inputProducts} />
         )}
@@ -188,8 +159,6 @@ export default function Market() {
             commodities={commodities}
             villagePrices={villagePrices}
             saveVillagePrices={saveVillagePrices}
-            equipmentList={equipmentList}
-            saveEquipment={saveEquipment}
             inputProducts={inputProducts}
             saveProducts={saveProducts}
           />
@@ -394,96 +363,10 @@ function MarketPricesView({ villages, districts, commodities, villagePrices }) {
 }
 
 // ============================================================
-// CHC VIEW
-// ============================================================
-function CHCView({ equipmentList }) {
-  const [booking, setBooking] = useState(null);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingDays, setBookingDays] = useState(1);
-  const [confirmed, setConfirmed] = useState(false);
-
-  const handleBook = (eq) => { setBooking(eq); setConfirmed(false); };
-  const handleConfirm = () => { setConfirmed(true); };
-
-  return (
-    <div className="chc-view">
-      <div className="chc-intro card">
-        <div className="section-title"><Tractor size={20} /> Custom Hiring Centre – Equipment Booking</div>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>Book farm machinery at subsidized rates. Available 7 days a week. Contact: 9876543210</p>
-      </div>
-      <div className="chc-grid stagger">
-        {equipmentList.map(eq => (
-          <div key={eq.id} className="chc-card card">
-            <div className="chc-card-header">
-              <div className="chc-icon">{iconMap[eq.icon] || <Tractor size={24} />}</div>
-              <div className={`availability ${eq.available > 0 ? 'av-yes' : 'av-no'}`}>
-                {eq.available > 0 ? `${eq.available}/${eq.total} Available` : 'All Booked'}
-              </div>
-            </div>
-            <div className="chc-name">{eq.name}</div>
-            <div className="chc-desc">{eq.description}</div>
-            <div className="chc-pricing">
-              <div className="chc-rate"><span className="rate-val">{eq.rate}</span><span className="rate-label">Hire Rate</span></div>
-              <div className="chc-rate"><span className="rate-val">{eq.deposit}</span><span className="rate-label">Deposit</span></div>
-            </div>
-            <button
-              className={`btn ${eq.available > 0 ? 'btn-primary' : 'btn-secondary'} w-full`}
-              onClick={() => eq.available > 0 && handleBook(eq)}
-              disabled={eq.available === 0}
-            >
-              {eq.available > 0 ? '📅 Book Now' : '⏳ Join Waitlist'}
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* Booking Modal */}
-      {booking && (
-        <div className="pest-modal-overlay" onClick={() => setBooking(null)}>
-          <div className="booking-modal glass-card" onClick={e => e.stopPropagation()}>
-            {confirmed ? (
-              <div className="booking-success text-center">
-                <div className="success-icon" style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-                <h2>Booking Confirmed!</h2>
-                <p>Your {booking.name} has been booked for {bookingDate}.<br />A confirmation SMS will be sent to your registered mobile.</p>
-                <div className="badge badge-green" style={{ marginTop: 8 }}>Ref: CHC-{Math.floor(Math.random() * 9000) + 1000}</div>
-                <br />
-                <button className="btn btn-secondary" onClick={() => setBooking(null)} style={{ marginTop: 'var(--space-4)', width: '100%' }}>Close</button>
-              </div>
-            ) : (
-              <>
-                <h2>Book: {booking.name}</h2>
-                <div className="chc-pricing" style={{ marginBottom: 'var(--space-4)', marginTop: 12 }}>
-                  <div className="chc-rate"><span className="rate-val">{booking.rate}</span><span className="rate-label">Rate</span></div>
-                  <div className="chc-rate"><span className="rate-val">{booking.deposit}</span><span className="rate-label">Deposit</span></div>
-                </div>
-                <div className="form-group">
-                  <label>Date Required</label>
-                  <input type="date" className="input-field" value={bookingDate} onChange={e => setBookingDate(e.target.value)} min={new Date().toISOString().split('T')[0]} />
-                </div>
-                <div className="form-group" style={{ marginTop: 12 }}>
-                  <label>Duration (days)</label>
-                  <input type="number" className="input-field" value={bookingDays} min={1} max={7} onChange={e => setBookingDays(+e.target.value)} />
-                </div>
-                <div className="booking-actions" style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-                  <button className="btn btn-primary btn-lg" style={{ flex: 1 }} onClick={handleConfirm} disabled={!bookingDate}>Confirm Booking</button>
-                  <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setBooking(null)}>Cancel</button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
 // INPUT STORE VIEW
 // ============================================================
 function InputStoreView({ inputProducts }) {
   const [cat, setCat] = useState('All');
-  const [cart, setCart] = useState([]);
 
   const categories = useMemo(() => {
     return ['All', ...new Set(inputProducts.map(i => i.category))];
@@ -491,39 +374,35 @@ function InputStoreView({ inputProducts }) {
 
   const filtered = inputProducts.filter(i => cat === 'All' || i.category === cat);
 
-  const addToCart = (item) => {
-    setCart(prev => prev.find(c => c.id === item.id) ? prev : [...prev, { ...item, qty: 1 }]);
-  };
-
   return (
     <div className="input-store-view">
-      {cart.length > 0 && (
-        <div className="cart-bar card animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'var(--space-4)' }}>
-          <ShoppingBag size={18} />
-          <span>{cart.length} item{cart.length > 1 ? 's' : ''} in cart</span>
-          <div className="cart-items-preview" style={{ flex: 1, display: 'flex', gap: 8, overflowX: 'auto' }}>
-            {cart.map(c => <span key={c.id} className="cart-chip">{c.name}</span>)}
-          </div>
-          <button className="btn btn-amber btn-sm" onClick={() => { alert('Order placed! CLIC facilitator will contact you.'); setCart([]); }}>Place Order</button>
-        </div>
-      )}
       <div className="cat-chips" style={{ marginBottom: 'var(--space-4)' }}>
-        {categories.map(c => <button key={c} className={`cat-chip ${cat === c ? 'active' : ''}`} onClick={() => setCat(c)}>{c}</button>)}
+        {categories.map(c => (
+          <button
+            key={c}
+            className={`cat-chip ${cat === c ? 'active' : ''}`}
+            onClick={() => setCat(c)}
+          >
+            {c}
+          </button>
+        ))}
       </div>
       <div className="input-grid stagger">
         {filtered.map(item => (
           <div key={item.id} className="input-card card">
             <div className="input-card-top">
-              <span className={`badge ${item.category === 'Bio-Fertilizer' ? 'badge-green' : item.category === 'Seeds' ? 'badge-amber' : 'badge-sky'}`}>{item.category}</span>
-              <span className="input-stock">{item.stock > 50 ? '🟢 In Stock' : item.stock > 0 ? '🟡 Low Stock' : '🔴 Out of Stock'}</span>
+              <span className={`badge ${item.category === 'Bio-Fertilizer' ? 'badge-green' : item.category === 'Seeds' ? 'badge-amber' : 'badge-sky'}`}>
+                {item.category}
+              </span>
+              <span className="input-stock">
+                {item.stock > 50 ? '🟢 In Stock' : item.stock > 0 ? '🟡 Low Stock' : '🔴 Out of Stock'}
+              </span>
             </div>
             <div className="input-name">{item.name}</div>
             <div className="input-desc">{item.description}</div>
-            <div className="input-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-3)', marginTop: 'var(--space-2)' }}>
+            <div className="input-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-3)', marginTop: 'var(--space-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div className="input-price">₹{item.price}<span>/{item.unit}</span></div>
-              <button className="btn btn-primary btn-sm" onClick={() => addToCart(item)} disabled={item.stock === 0}>
-                {cart.find(c => c.id === item.id) ? '✓ Added' : '+ Add to Order'}
-              </button>
+              <span className="text-secondary" style={{ fontSize: '11px' }}>Available: <strong>{item.stock} {item.unit}s</strong></span>
             </div>
           </div>
         ))}
@@ -541,7 +420,6 @@ function ManageBusinessView({
   districts,
   commodities,
   villagePrices, saveVillagePrices,
-  equipmentList, saveEquipment,
   inputProducts, saveProducts
 }) {
   const [subTab, setSubTab] = useState('Village Rates');
@@ -549,7 +427,7 @@ function ManageBusinessView({
   return (
     <div className="manage-business-view">
       <div className="subtabs-bar">
-        {['Village Rates', 'CHC Equipment', 'Input Store Products'].map(st => (
+        {['Village Rates', 'Input Store Products'].map(st => (
           <button
             key={st}
             className={`subtab-btn ${subTab === st ? 'active' : ''}`}
@@ -570,9 +448,6 @@ function ManageBusinessView({
             villagePrices={villagePrices}
             saveVillagePrices={saveVillagePrices}
           />
-        )}
-        {subTab === 'CHC Equipment' && (
-          <EquipmentManager equipmentList={equipmentList} saveEquipment={saveEquipment} />
         )}
         {subTab === 'Input Store Products' && (
           <ProductsManager inputProducts={inputProducts} saveProducts={saveProducts} />
@@ -596,7 +471,7 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
   const [change, setChange] = useState('');
   const [date, setDate] = useState('Jul 21');
 
-  // Hierarchy States
+  // Hierarchy filter states in form
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrictId, setSelectedDistrictId] = useState('');
 
@@ -698,37 +573,28 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
       {editingId ? (
         <div className="card form-card animate-fade-in">
           <div className="section-title">
-            <Save size={16} className="text-sky" />
-            <span>{editingId === 'new' ? 'Log New Village Price' : 'Edit Rate Entry'}</span>
+            <Save size={16} className="text-green" />
+            <span>{editingId === 'new' ? 'Record New Village Commodity Price' : 'Edit Village Price'}</span>
           </div>
 
           <form onSubmit={handleSave}>
             <div className="register-form-grid">
+              
+              {/* State Filter */}
               <div className="form-group">
-                <label>Commodity / Crop *</label>
-                <select className="input-field select-field" value={crop} onChange={e => setCrop(e.target.value)}>
-                  {commodities.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                  {commodities.length === 0 && <option value="Cotton">Cotton</option>}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>State *</label>
+                <label>State</label>
                 <select
                   className="input-field select-field"
                   value={selectedState}
                   onChange={e => {
-                    const s = e.target.value;
-                    setSelectedState(s);
-                    const sDists = districts.filter(d => d.state === s);
-                    const initialDId = sDists[0]?.id || '';
-                    setSelectedDistrictId(initialDId);
-                    const dVils = villages.filter(v => v.districtId === initialDId);
+                    const st = e.target.value;
+                    setSelectedState(st);
+                    const sDists = districts.filter(d => d.state === st);
+                    const firstDId = sDists[0]?.id || '';
+                    setSelectedDistrictId(firstDId);
+                    const dVils = villages.filter(v => v.districtId === firstDId);
                     setVillageId(dVils[0]?.id || '');
                   }}
-                  required
                 >
                   {states.map(s => (
                     <option key={s} value={s}>{s}</option>
@@ -736,8 +602,9 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
                 </select>
               </div>
 
+              {/* District Filter */}
               <div className="form-group">
-                <label>District *</label>
+                <label>District</label>
                 <select
                   className="input-field select-field"
                   value={selectedDistrictId}
@@ -747,7 +614,6 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
                     const dVils = villages.filter(v => v.districtId === dId);
                     setVillageId(dVils[0]?.id || '');
                   }}
-                  required
                 >
                   {districts.filter(d => d.state === selectedState).map(d => (
                     <option key={d.id} value={d.id}>{d.name}</option>
@@ -755,8 +621,9 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
                 </select>
               </div>
 
+              {/* Target Village */}
               <div className="form-group">
-                <label>Village *</label>
+                <label>Target Village *</label>
                 <select
                   className="input-field select-field"
                   value={villageId}
@@ -767,43 +634,91 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
                     <option key={v.id} value={v.id}>{v.name}</option>
                   ))}
                   {villages.filter(v => v.districtId === selectedDistrictId).length === 0 && (
-                    <option value="">No villages in district</option>
+                    <option value="">No villages mapped in this district</option>
                   )}
                 </select>
               </div>
 
+              {/* Commodity */}
               <div className="form-group">
-                <label>Variety</label>
-                <input type="text" className="input-field" placeholder="e.g. Swarna / BPT 5204" value={variety} onChange={e => setVariety(e.target.value)} />
-              </div>
-
-              <div className="form-group">
-                <label>Price (₹/qtl) *</label>
-                <input type="number" className="input-field" placeholder="e.g. 6850" value={price} onChange={e => setPrice(e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Price Shift Trend</label>
-                <select className="input-field select-field" value={trend} onChange={e => setTrend(e.target.value)}>
-                  <option value="up">Price Up (Increasing)</option>
-                  <option value="down">Price Down (Decreasing)</option>
-                  <option value="flat">No Shift (Flat)</option>
+                <label>Commodity *</label>
+                <select
+                  className="input-field select-field"
+                  value={crop}
+                  onChange={e => setCrop(e.target.value)}
+                >
+                  {commodities.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
 
+              {/* Variety */}
               <div className="form-group">
-                <label>Price Change Amount (₹)</label>
-                <input type="number" className="input-field" placeholder="e.g. 50 or -30" value={change} onChange={e => setChange(e.target.value)} />
+                <label>Variety / Grade</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Medium Staple, Desi"
+                  value={variety}
+                  onChange={e => setVariety(e.target.value)}
+                />
               </div>
 
+              {/* Price */}
               <div className="form-group">
-                <label>Reporting Date</label>
-                <input type="text" className="input-field" placeholder="e.g. Jul 21" value={date} onChange={e => setDate(e.target.value)} />
+                <label>Buying Price (₹ / Quintal) *</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  placeholder="e.g. 7200"
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* Trend */}
+              <div className="form-group">
+                <label>Trend Direction</label>
+                <select
+                  className="input-field select-field"
+                  value={trend}
+                  onChange={e => setTrend(e.target.value)}
+                >
+                  <option value="up">📈 Up (Price Increased)</option>
+                  <option value="down">📉 Down (Price Decreased)</option>
+                  <option value="flat">➖ Flat (Stable)</option>
+                </select>
+              </div>
+
+              {/* Change */}
+              <div className="form-group">
+                <label>Daily Change (₹)</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  placeholder="e.g. 50"
+                  value={change}
+                  onChange={e => setChange(e.target.value)}
+                />
+              </div>
+
+              {/* Date */}
+              <div className="form-group">
+                <label>Date String</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="e.g. Jul 21"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                />
               </div>
             </div>
 
             <div className="form-submit-row">
-              <button type="submit" className="btn btn-primary">Save Price Log</button>
+              <button type="submit" className="btn btn-primary">Save Village Price</button>
               <button type="button" className="btn btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
             </div>
           </form>
@@ -811,9 +726,14 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
       ) : (
         <div className="card list-card">
           <div className="library-action-header">
-            <div className="section-title">Village procurement rates database</div>
+            <div>
+              <div className="section-title" style={{ margin: 0 }}>Village Commodity Farm-Gate Prices</div>
+              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                Current buying prices at village collection centres
+              </div>
+            </div>
             <button className="btn btn-primary btn-sm" onClick={handleAddNew}>
-              <Plus size={14} /> Log Price
+              <Plus size={14} /> Add Village Price
             </button>
           </div>
 
@@ -822,28 +742,37 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
               <thead>
                 <tr>
                   <th>Commodity</th>
-                  <th>Variety</th>
-                  <th>Village</th>
-                  <th>Rate</th>
-                  <th>Shift</th>
+                  <th>Location (Village & District)</th>
+                  <th>Price (₹/qtl)</th>
+                  <th>Trend</th>
+                  <th>Change</th>
+                  <th>Date</th>
                   <th style={{ width: '120px', textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {villagePrices.map(vp => {
-                  const v = villages.find(vil => vil.id === vp.villageId) || { name: 'Unknown', districtId: '' };
-                  const d = districts.find(dist => dist.id === v.districtId) || { name: 'Unknown' };
+                  const v = villages.find(vil => vil.id === vp.villageId);
+                  const d = districts.find(dist => dist.id === v?.districtId);
                   return (
                     <tr key={vp.id}>
-                      <td className="font-semibold text-green">{vp.crop}</td>
-                      <td className="text-secondary">{vp.variety || '-'}</td>
-                      <td><strong>{v.name}</strong> ({d.name})</td>
-                      <td><strong>₹{vp.price}</strong>/qtl</td>
                       <td>
-                        <span className={`change-badge cb-${vp.trend}`} style={{ fontSize: '10px' }}>
-                          {vp.trend === 'up' ? '+' : ''}{vp.change}
+                        <strong>{vp.crop}</strong>
+                        {vp.variety && <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>{vp.variety}</div>}
+                      </td>
+                      <td>
+                        <strong>{v ? v.name : vp.villageId}</strong>
+                        {d && <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>📍 {d.name}, {d.state}</div>}
+                      </td>
+                      <td><strong>₹{vp.price}</strong></td>
+                      <td>
+                        <span className={`change-badge cb-${vp.trend}`} style={{ display: 'inline-flex' }}>
+                          {vp.trend === 'up' ? <TrendingUp size={10} /> : vp.trend === 'down' ? <TrendingDown size={10} /> : <Minus size={10} />}
+                          {vp.trend}
                         </span>
                       </td>
+                      <td>{vp.change > 0 ? `+₹${vp.change}` : vp.change < 0 ? `-₹${Math.abs(vp.change)}` : '₹0'}</td>
+                      <td>{vp.date}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button className="btn-icon text-sky" style={{ marginRight: '12px' }} onClick={() => handleEdit(vp)}>
                           <Edit2 size={14} />
@@ -864,189 +793,6 @@ function RatesManager({ states, villages, districts, commodities, villagePrices,
   );
 }
 
-// ── 3. CHC EQUIPMENT MANAGER ───────────────────────────────
-function EquipmentManager({ equipmentList, saveEquipment }) {
-  const [editingId, setEditingId] = useState(null);
-
-  // Form states
-  const [name, setName] = useState('');
-  const [icon, setIcon] = useState('tractor');
-  const [available, setAvailable] = useState(1);
-  const [total, setTotal] = useState(1);
-  const [rate, setRate] = useState('');
-  const [deposit, setDeposit] = useState('');
-  const [description, setDescription] = useState('');
-
-  const handleEdit = (eq) => {
-    setEditingId(eq.id);
-    setName(eq.name);
-    setIcon(eq.icon || 'tractor');
-    setAvailable(eq.available);
-    setTotal(eq.total);
-    setRate(eq.rate);
-    setDeposit(eq.deposit);
-    setDescription(eq.description);
-  };
-
-  const handleAddNew = () => {
-    setEditingId('new');
-    setName('');
-    setIcon('tractor');
-    setAvailable(1);
-    setTotal(1);
-    setRate('₹500/hr');
-    setDeposit('₹1,000');
-    setDescription('');
-  };
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    if (!name) {
-      alert('Equipment Name is required.');
-      return;
-    }
-
-    const newObj = {
-      id: editingId === 'new' ? Date.now() : editingId,
-      name,
-      icon,
-      available: Number(available),
-      total: Number(total),
-      rate,
-      deposit,
-      description
-    };
-
-    let updated;
-    if (editingId === 'new') {
-      updated = [...equipmentList, newObj];
-    } else {
-      updated = equipmentList.map(item => item.id === editingId ? newObj : item);
-    }
-
-    saveEquipment(updated);
-    setEditingId(null);
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm('Delete this equipment?')) {
-      saveEquipment(equipmentList.filter(item => item.id !== id));
-    }
-  };
-
-  return (
-    <div className="equipment-manager">
-      {editingId ? (
-        <div className="card form-card animate-fade-in">
-          <div className="section-title">
-            <Save size={16} className="text-sky" />
-            <span>{editingId === 'new' ? 'Add CHC Machinery' : 'Edit Machinery details'}</span>
-          </div>
-
-          <form onSubmit={handleSave}>
-            <div className="register-form-grid">
-              <div className="form-group">
-                <label>Machinery Name *</label>
-                <input type="text" className="input-field" placeholder="e.g. Combined Harvester" value={name} onChange={e => setName(e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Icon Symbol</label>
-                <select className="input-field select-field" value={icon} onChange={e => setIcon(e.target.value)}>
-                  <option value="tractor">🚜 Tractor</option>
-                  <option value="leaf">🍃 Transplanter</option>
-                  <option value="settings">⚙️ Tiller / Rotavator</option>
-                  <option value="zap">⚡ Sprayer</option>
-                  <option value="wind">💨 Thresher</option>
-                  <option value="circle-dot">🔘 Drum Seeder</option>
-                  <option value="droplets">💧 Irrigation Kit</option>
-                  <option value="minimize-2">📏 Leveler</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Subsidized Hire Rate *</label>
-                <input type="text" className="input-field" placeholder="e.g. ₹600/hr or ₹1500/day" value={rate} onChange={e => setRate(e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Refundable Deposit *</label>
-                <input type="text" className="input-field" placeholder="e.g. ₹1,000" value={deposit} onChange={e => setDeposit(e.target.value)} required />
-              </div>
-
-              <div className="form-group">
-                <label>Total Quantity in Fleet</label>
-                <input type="number" className="input-field" value={total} onChange={e => setTotal(e.target.value)} />
-              </div>
-
-              <div className="form-group">
-                <label>Currently Available</label>
-                <input type="number" className="input-field" value={available} onChange={e => setAvailable(e.target.value)} />
-              </div>
-
-              <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label>Machinery Description & Specs *</label>
-                <textarea className="input-field" placeholder="Capacity, HP, fuel details..." value={description} onChange={e => setDescription(e.target.value)} rows={2} required />
-              </div>
-            </div>
-
-            <div className="form-submit-row">
-              <button type="submit" className="btn btn-primary">Save Equipment</button>
-              <button type="button" className="btn btn-secondary" onClick={() => setEditingId(null)}>Cancel</button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        <div className="card list-card">
-          <div className="library-action-header">
-            <div className="section-title">Custom hiring center machinery logs</div>
-            <button className="btn btn-primary btn-sm" onClick={handleAddNew}>
-              <Plus size={14} /> Add Machinery
-            </button>
-          </div>
-
-          <div className="table-responsive" style={{ marginTop: 'var(--space-3)' }}>
-            <table className="logs-table">
-              <thead>
-                <tr>
-                  <th>Equipment</th>
-                  <th>Hire Rate</th>
-                  <th>Deposit</th>
-                  <th>Fleet Status</th>
-                  <th style={{ width: '120px', textAlign: 'center' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {equipmentList.map(eq => (
-                  <tr key={eq.id}>
-                    <td>
-                      <span style={{ marginRight: 8, display: 'inline-block', verticalAlign: 'middle' }}>
-                        {iconMap[eq.icon] || <Tractor size={18} />}
-                      </span>
-                      <strong>{eq.name}</strong>
-                    </td>
-                    <td>{eq.rate}</td>
-                    <td>{eq.deposit}</td>
-                    <td>{eq.available} / {eq.total} available</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <button className="btn-icon text-sky" style={{ marginRight: '12px' }} onClick={() => handleEdit(eq)}>
-                        <Edit2 size={14} />
-                      </button>
-                      <button className="btn-icon text-alert" onClick={() => handleDelete(eq.id)}>
-                        <Trash2 size={14} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ============================================================
 // INPUT STORE PRODUCTS MANAGER ──────────────────────────
 // ============================================================
@@ -1058,16 +804,16 @@ function ProductsManager({ inputProducts, saveProducts }) {
   const [category, setCategory] = useState('Bio-Fertilizer');
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('kg');
-  const [stock, setStock] = useState(100);
+  const [stock, setStock] = useState('');
   const [description, setDescription] = useState('');
 
   const handleEdit = (p) => {
     setEditingId(p.id);
     setName(p.name);
-    setCategory(p.category || 'Bio-Fertilizer');
+    setCategory(p.category);
     setPrice(p.price);
-    setUnit(p.unit || 'kg');
-    setStock(p.stock || 100);
+    setUnit(p.unit);
+    setStock(p.stock);
     setDescription(p.description);
   };
 
@@ -1077,14 +823,14 @@ function ProductsManager({ inputProducts, saveProducts }) {
     setCategory('Bio-Fertilizer');
     setPrice('');
     setUnit('kg');
-    setStock(100);
+    setStock('');
     setDescription('');
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!name || !price) {
-      alert('Product Name and Price are required.');
+    if (!name || !price || !stock) {
+      alert('Name, price and stock are required.');
       return;
     }
 
@@ -1100,7 +846,7 @@ function ProductsManager({ inputProducts, saveProducts }) {
 
     let updated;
     if (editingId === 'new') {
-      updated = [...inputProducts, newObj];
+      updated = [newObj, ...inputProducts];
     } else {
       updated = inputProducts.map(item => item.id === editingId ? newObj : item);
     }
@@ -1120,44 +866,45 @@ function ProductsManager({ inputProducts, saveProducts }) {
       {editingId ? (
         <div className="card form-card animate-fade-in">
           <div className="section-title">
-            <Save size={16} className="text-sky" />
-            <span>{editingId === 'new' ? 'Add Input Store Product' : 'Edit Product details'}</span>
+            <Save size={16} className="text-green" />
+            <span>{editingId === 'new' ? 'Add Input Store Product' : 'Edit Product'}</span>
           </div>
 
           <form onSubmit={handleSave}>
             <div className="register-form-grid">
               <div className="form-group">
                 <label>Product Name *</label>
-                <input type="text" className="input-field" placeholder="e.g. Azotobacter culture" value={name} onChange={e => setName(e.target.value)} required />
+                <input type="text" className="input-field" placeholder="e.g. Bio-Potash" value={name} onChange={e => setName(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label>Product Category</label>
+                <label>Category *</label>
                 <select className="input-field select-field" value={category} onChange={e => setCategory(e.target.value)}>
                   <option value="Bio-Fertilizer">Bio-Fertilizer</option>
                   <option value="Seeds">Seeds</option>
-                  <option value="Botanical">Botanical (Biopesticide)</option>
+                  <option value="Micro-Nutrients">Micro-Nutrients</option>
+                  <option value="Bio-Pesticide">Bio-Pesticide</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Subsidized Price (₹) *</label>
-                <input type="number" className="input-field" placeholder="e.g. 50" value={price} onChange={e => setPrice(e.target.value)} required />
+                <label>Price (₹) *</label>
+                <input type="number" className="input-field" placeholder="e.g. 450" value={price} onChange={e => setPrice(e.target.value)} required />
               </div>
 
               <div className="form-group">
-                <label>Selling Unit *</label>
-                <input type="text" className="input-field" placeholder="e.g. kg / 200g packet / litre" value={unit} onChange={e => setUnit(e.target.value)} required />
+                <label>Unit</label>
+                <input type="text" className="input-field" placeholder="e.g. kg, liter, bag" value={unit} onChange={e => setUnit(e.target.value)} />
               </div>
 
               <div className="form-group">
-                <label>Stock Available (quantity)</label>
-                <input type="number" className="input-field" value={stock} onChange={e => setStock(e.target.value)} />
+                <label>Available Stock (Units) *</label>
+                <input type="number" className="input-field" placeholder="e.g. 100" value={stock} onChange={e => setStock(e.target.value)} required />
               </div>
 
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label>Product Description & Specs *</label>
-                <textarea className="input-field" placeholder="Dosage, crop usage guidelines, manufacturing date..." value={description} onChange={e => setDescription(e.target.value)} rows={2} required />
+                <label>Description</label>
+                <textarea className="input-field" placeholder="Short description of product..." value={description} onChange={e => setDescription(e.target.value)} rows={2} />
               </div>
             </div>
 
@@ -1170,7 +917,12 @@ function ProductsManager({ inputProducts, saveProducts }) {
       ) : (
         <div className="card list-card">
           <div className="library-action-header">
-            <div className="section-title">Agri-input store catalog</div>
+            <div>
+              <div className="section-title" style={{ margin: 0 }}>Input Store Inventory</div>
+              <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>
+                Manage seeds, bio-fertilizers, and farm input stocks
+              </div>
+            </div>
             <button className="btn btn-primary btn-sm" onClick={handleAddNew}>
               <Plus size={14} /> Add Product
             </button>
@@ -1180,22 +932,27 @@ function ProductsManager({ inputProducts, saveProducts }) {
             <table className="logs-table">
               <thead>
                 <tr>
-                  <th>Product</th>
+                  <th>Product Name</th>
                   <th>Category</th>
                   <th>Price</th>
-                  <th>Unit</th>
-                  <th>Stock status</th>
+                  <th>Stock Available</th>
                   <th style={{ width: '120px', textAlign: 'center' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {inputProducts.map(p => (
                   <tr key={p.id}>
-                    <td><strong>{p.name}</strong></td>
+                    <td>
+                      <strong>{p.name}</strong>
+                      {p.description && <div style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>{p.description}</div>}
+                    </td>
                     <td><span className="badge badge-sky">{p.category}</span></td>
-                    <td className="font-semibold text-green">₹{p.price}</td>
-                    <td>{p.unit}</td>
-                    <td>{p.stock} units</td>
+                    <td><strong>₹{p.price}/{p.unit}</strong></td>
+                    <td>
+                      <span className={`badge ${p.stock > 50 ? 'badge-green' : p.stock > 0 ? 'badge-amber' : 'badge-alert'}`}>
+                        {p.stock} {p.unit}s
+                      </span>
+                    </td>
                     <td style={{ textAlign: 'center' }}>
                       <button className="btn-icon text-sky" style={{ marginRight: '12px' }} onClick={() => handleEdit(p)}>
                         <Edit2 size={14} />

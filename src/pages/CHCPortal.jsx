@@ -55,14 +55,24 @@ export default function CHCPortal() {
     ];
   });
 
+  const [selectedHubId, setSelectedHubId] = useState(() => {
+    if (user?.email) {
+      const match = chcHubs.find(h => h.email?.toLowerCase() === user.email.toLowerCase());
+      if (match) return match.id;
+    }
+    return chcHubs[0]?.id || 'chc-1';
+  });
+
   // Current active CHC Hub
   const activeHub = useMemo(() => {
+    const found = chcHubs.find(h => h.id === selectedHubId);
+    if (found) return found;
     if (user?.email) {
       const match = chcHubs.find(h => h.email?.toLowerCase() === user.email.toLowerCase());
       if (match) return match;
     }
     return chcHubs[0];
-  }, [chcHubs, user]);
+  }, [chcHubs, selectedHubId, user]);
 
   // Master Machines State
   const [machines, setMachines] = useState(() => {
@@ -93,11 +103,23 @@ export default function CHCPortal() {
     return orders.filter(o => o.type === 'rental');
   }, [orders]);
 
-  // Machines linked to this CHC Hub
+  // Machines linked to this CHC Hub (excluding FMC dealership purchase models)
   const hubFleet = useMemo(() => {
     return machines.filter(m => {
-      const hubName = m.chcAvailability?.chcHub?.toLowerCase() || '';
-      return hubName.includes(activeHub.name.toLowerCase()) || hubName.includes(activeHub.village.toLowerCase()) || !m.chcAvailability?.chcHub;
+      // Exclude FMC dealership models
+      if (m.isFmc || m.type === 'fmc') return false;
+
+      const hubId = m.chcAvailability?.chcHubId || m.chcHubId;
+      if (hubId) return hubId === activeHub.id;
+
+      const hubName = m.chcAvailability?.chcHub?.toLowerCase() || m.chcHub?.toLowerCase() || '';
+      const activeName = (activeHub.name || '').toLowerCase();
+      const activeVil = (activeHub.village || '').toLowerCase();
+
+      if (hubName) {
+        return hubName.includes(activeName) || activeName.includes(hubName) || (activeVil && hubName.includes(activeVil));
+      }
+      return activeHub.id === 'chc-1';
     });
   }, [machines, activeHub]);
 
@@ -112,6 +134,7 @@ export default function CHCPortal() {
   const [newImplementForm, setNewImplementForm] = useState({
     name: '',
     telugu: '',
+    chcHubId: activeHub.id,
     operationId: 'land-prep',
     category: 'Tractor & Heavy Implements',
     powerHP: '50 HP',
@@ -174,57 +197,66 @@ export default function CHCPortal() {
     }
 
     const opObj = MACHINERY_OPERATIONS.find(op => op.id === newImplementForm.operationId) || MACHINERY_OPERATIONS[0];
+    const targetHub = chcHubs.find(h => h.id === newImplementForm.chcHubId) || activeHub;
 
     const newMach = {
       id: `m-chc-${Date.now()}`,
       name: newImplementForm.name.trim(),
       telugu: newImplementForm.telugu.trim() || newImplementForm.name.trim(),
+      type: 'chc',
+      isChc: true,
+      isFmc: false,
+      chcHubId: targetHub.id,
+      chcHub: targetHub.name,
       operationId: opObj.id,
       operationName: opObj.name,
-      category: newImplementForm.category,
-      powerHP: newImplementForm.powerHP,
-      fuelType: newImplementForm.fuelType,
-      capacity: newImplementForm.capacity,
-      brand: newImplementForm.brand,
+      category: newImplementForm.category || 'Tractor & Heavy Implements',
+      powerHP: newImplementForm.powerHP || '50 HP',
+      fuelType: newImplementForm.fuelType || 'Diesel (4.0 L/hr)',
+      capacity: newImplementForm.capacity || '3.0 acres/day',
+      brand: newImplementForm.brand || 'Onboarded Implement',
       thumbnail: newImplementForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
       gallery: [newImplementForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80'],
       videoUrl: newImplementForm.videoUrl || 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
       videoTitle: newImplementForm.videoTitle || `${newImplementForm.name} Field Operation Video`,
-      description: newImplementForm.description.trim() || `${newImplementForm.name} registered and maintained directly by ${activeHub.name}.`,
+      description: newImplementForm.description.trim() || `${newImplementForm.name} registered and maintained directly by ${targetHub.name}.`,
       specs: {
-        'Engine Power': newImplementForm.powerHP,
-        'Fuel Consumption': newImplementForm.fuelType,
-        'Field Capacity': newImplementForm.capacity,
-        'Assigned CHC Hub': activeHub.name,
-        'Hub In-Charge': activeHub.inCharge
+        'Engine Power': newImplementForm.powerHP || '50 HP',
+        'Fuel Consumption': newImplementForm.fuelType || 'Diesel (4.0 L/hr)',
+        'Field Capacity': newImplementForm.capacity || '3.0 acres/day',
+        'Assigned CHC Hub': targetHub.name,
+        'Hub In-Charge': targetHub.inCharge
       },
       chcAvailability: {
-        total: Number(newImplementForm.totalUnits) || 2,
-        available: Number(newImplementForm.availableUnits) || 2,
+        total: Number(newImplementForm.totalUnits) || 1,
+        available: Number(newImplementForm.availableUnits) || 1,
         rateHourly: Number(newImplementForm.rateHourly) || 600,
         rateDaily: Number(newImplementForm.rateDaily) || 4500,
         ratePerAcre: Number(newImplementForm.ratePerAcre) || 1200,
         deposit: Number(newImplementForm.deposit) || 1500,
-        chcHub: activeHub.name,
+        chcHub: targetHub.name,
+        chcHubId: targetHub.id,
         operatorAvailable: Boolean(newImplementForm.operatorAvailable),
         operatorRateExtra: 150
       },
-      purchaseInfo: {
-        msrp: 550000,
-        subsidyPercent: 40,
-        subsidyAmount: 220000,
-        effectivePrice: 330000,
-        dealers: [{ name: 'CLIC Central Agri Dealership', city: activeHub.district, contact: activeHub.phone }]
-      }
+      available: Number(newImplementForm.availableUnits) || 1,
+      total: Number(newImplementForm.totalUnits) || 1,
+      rate: `₹${Number(newImplementForm.rateHourly) || 600}/hr`,
+      deposit: `₹${(Number(newImplementForm.deposit) || 1500).toLocaleString()}`
     };
 
-    setMachines(prev => [newMach, ...prev]);
+    const updated = [newMach, ...machines];
+    setMachines(updated);
+    localStorage.setItem('clic_custom_machines', JSON.stringify(updated));
+    window.dispatchEvent(new Event('storage'));
+
     setShowUploadModal(false);
-    showToast(`✓ Equipment "${newMach.name}" registered to ${activeHub.name}!`);
+    showToast(`✓ Equipment "${newMach.name}" registered to ${targetHub.name}!`);
 
     setNewImplementForm({
       name: '',
       telugu: '',
+      chcHubId: activeHub.id,
       operationId: 'land-prep',
       category: 'Tractor & Heavy Implements',
       powerHP: '50 HP',
@@ -249,7 +281,10 @@ export default function CHCPortal() {
   const handleSaveQuickEdit = (e) => {
     e.preventDefault();
     if (!quickEditMachine) return;
-    setMachines(prev => prev.map(m => m.id === quickEditMachine.id ? quickEditMachine : m));
+    const updated = machines.map(m => m.id === quickEditMachine.id ? quickEditMachine : m);
+    setMachines(updated);
+    localStorage.setItem('clic_custom_machines', JSON.stringify(updated));
+    window.dispatchEvent(new Event('storage'));
     setQuickEditMachine(null);
     showToast(`✓ Live fleet availability updated for "${quickEditMachine.name}"!`);
   };
@@ -294,7 +329,7 @@ export default function CHCPortal() {
               🚜
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span className="badge badge-sky">Custom Hiring Center (CHC) Operator Console</span>
                 <span className="badge badge-green">Dedicated Provider Mode</span>
               </div>
@@ -302,12 +337,29 @@ export default function CHCPortal() {
                 {activeHub.name}
               </h1>
               <p className="text-secondary" style={{ fontSize: '12px', margin: 0 }}>
-                📍 {activeHub.village}, {activeHub.district} · In-Charge: <strong>{activeHub.inCharge}</strong> (📱 {activeHub.phone}) · Role: <code>chc_operator</code>
+                📍 {activeHub.village || activeHub.city || 'Chandampet'}, {activeHub.district || 'Nalgonda'} · In-Charge: <strong>{activeHub.inCharge || 'CHC Lead'}</strong> (📱 {activeHub.phone || '9848011223'}) · Role: <code>chc_operator</code>
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* CHC Hub Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>CHC HUB:</span>
+              <select
+                className="input-field select-field"
+                value={activeHub.id}
+                onChange={e => setSelectedHubId(e.target.value)}
+                style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
+              >
+                {chcHubs.map(h => (
+                  <option key={h.id} value={h.id}>
+                    {h.name} ({h.village || h.city || h.district})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               className="btn btn-primary"
               onClick={() => setShowUploadModal(true)}
@@ -562,7 +614,7 @@ export default function CHCPortal() {
                 <Tractor size={18} className="text-sky" />
                 <div>
                   <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 'bold', margin: 0 }}>
-                    Register New Equipment to {activeHub.name}
+                    Register New Equipment to CHC Fleet
                   </h3>
                   <div style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
                     Add implement specs, fleet count, and hire rates for walk-in farmers
@@ -576,7 +628,7 @@ export default function CHCPortal() {
 
             <form onSubmit={handleRegisterImplement} style={{ padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <div className="machine-upload-grid">
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                <div className="form-group">
                   <label>Equipment / Implement Name *</label>
                   <input
                     className="input-field"
@@ -588,13 +640,27 @@ export default function CHCPortal() {
                 </div>
 
                 <div className="form-group">
-                  <label>Telugu Name (తెలుగు)</label>
+                  <label>Name in Telugu (తెలుగు)</label>
                   <input
                     className="input-field"
                     placeholder="e.g. స్వరాజ్ ట్రాక్టర్"
                     value={newImplementForm.telugu}
                     onChange={e => setNewImplementForm({ ...newImplementForm, telugu: e.target.value })}
                   />
+                </div>
+
+                <div className="form-group">
+                  <label>Assign to CHC Hub *</label>
+                  <select
+                    className="input-field select-field"
+                    value={newImplementForm.chcHubId}
+                    onChange={e => setNewImplementForm({ ...newImplementForm, chcHubId: e.target.value })}
+                    required
+                  >
+                    {chcHubs.map(h => (
+                      <option key={h.id} value={h.id}>{h.name} ({h.village})</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -632,7 +698,7 @@ export default function CHCPortal() {
                 </div>
 
                 <div className="form-group">
-                  <label>Total Units in Hub *</label>
+                  <label>Total Units in Fleet *</label>
                   <input
                     type="number"
                     min={1}
@@ -701,7 +767,40 @@ export default function CHCPortal() {
                   />
                 </div>
 
-                <div className="form-group full-width">
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Image Thumbnail URL</label>
+                  <input
+                    type="url"
+                    className="input-field"
+                    placeholder="https://images.unsplash.com/..."
+                    value={newImplementForm.thumbnail}
+                    onChange={e => setNewImplementForm({ ...newImplementForm, thumbnail: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
+                    <input
+                      type="checkbox"
+                      checked={newImplementForm.operatorAvailable}
+                      onChange={e => setNewImplementForm({ ...newImplementForm, operatorAvailable: e.target.checked })}
+                    />
+                    <span>👨‍🔧 Certified Driver & Trained Operator Included in Hub</span>
+                  </label>
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Description & Implement Features</label>
+                  <textarea
+                    className="input-field"
+                    placeholder="Implement specs, cutting width, attachment details..."
+                    value={newImplementForm.description}
+                    onChange={e => setNewImplementForm({ ...newImplementForm, description: e.target.value })}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="form-group full-width" style={{ gridColumn: 'span 2' }}>
                   <label>Demonstration Video (YouTube Embed Link)</label>
                   <input
                     className="input-field"

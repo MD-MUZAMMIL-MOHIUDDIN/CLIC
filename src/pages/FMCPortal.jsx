@@ -19,48 +19,79 @@ export default function FMCPortal() {
   const navigate = useNavigate();
 
   // Load Custom FMC Dealerships from localStorage
-  const [fmcDealers] = useState(() => {
+  const [fmcDealers, setFmcDealers] = useState(() => {
     const saved = localStorage.getItem('clic_custom_fmc');
-    return saved ? JSON.parse(saved) : [
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) return parsed;
+      } catch (e) { /* ignore */ }
+    }
+    return [
       {
         id: 'fmc-1',
-        name: 'Chandampet Sri Sai Agri Machinery Traders',
-        dealerOwner: 'Rajeshwar Reddy (Authorized Dealer)',
-        phone: '9849011223',
+        name: 'Sri Lakshmi Agro Automotives & Dealership',
+        dealerOwner: 'Rajesh Kumar (Authorized Dealer)',
+        inCharge: 'Rajesh Kumar (Authorized Dealer)',
+        phone: '9848011223',
         email: 'fmc@clic.in',
         role: 'fmc_dealer',
-        village: 'Chandampet',
+        city: 'Nalgonda Town',
+        village: 'Nalgonda Town',
         district: 'Nalgonda',
-        brands: 'Mahindra, Kubota, VST Tillers',
-        gstNumber: '36ABCDE1234F1Z5',
+        brands: 'John Deere, Kubota, Aspee Sprayers',
+        gstNumber: '36AAACL8912P1ZX',
+        gstin: '36AAACL8912P1ZX',
         bankAccount: 'HDFC - 50100293847192',
         status: 'Active'
       },
       {
         id: 'fmc-2',
-        name: 'Devarakonda Agro Commercial Implements',
-        dealerOwner: 'B. Sreenivasulu (Managing Partner)',
-        phone: '9440188772',
-        email: 'fmc.devarakonda@clic.in',
+        name: 'Kisan Machinery Plaza & Service Hub',
+        dealerOwner: 'M. Sridhar Reddy',
+        inCharge: 'M. Sridhar Reddy',
+        phone: '9848033445',
+        email: 'fmc.miryala@clic.in',
         role: 'fmc_dealer',
-        village: 'Devarakonda',
+        city: 'Miryalaguda',
+        village: 'Miryalaguda',
         district: 'Nalgonda',
-        brands: 'Swaraj, John Deere, Shaktiman',
-        gstNumber: '36XYZPQ9876R1Z2',
+        brands: 'Mahindra, Trimble Laser, Shakti Solar Pumps',
+        gstNumber: '36BBBCM4419Q2ZY',
+        gstin: '36BBBCM4419Q2ZY',
         bankAccount: 'SBI - 3084729182',
         status: 'Active'
       }
     ];
   });
 
+  const [selectedDealerId, setSelectedDealerId] = useState(() => {
+    if (user?.email) {
+      const match = fmcDealers.find(d => d.email?.toLowerCase() === user.email.toLowerCase());
+      if (match) return match.id;
+    }
+    return fmcDealers[0]?.id || 'fmc-1';
+  });
+
   // Current active FMC Dealership
   const activeDealer = useMemo(() => {
+    const found = fmcDealers.find(d => d.id === selectedDealerId);
+    if (found) return found;
     if (user?.email) {
       const match = fmcDealers.find(d => d.email?.toLowerCase() === user.email.toLowerCase());
       if (match) return match;
     }
-    return fmcDealers[0];
-  }, [fmcDealers, user]);
+    return fmcDealers[0] || {
+      id: 'fmc-1',
+      name: 'Sri Lakshmi Agro Automotives & Dealership',
+      dealerOwner: 'Rajesh Kumar',
+      inCharge: 'Rajesh Kumar',
+      phone: '9848011223',
+      city: 'Nalgonda Town',
+      district: 'Nalgonda',
+      gstNumber: '36AAACL8912P1ZX'
+    };
+  }, [fmcDealers, selectedDealerId, user]);
 
   // Master Machines State
   const [machines, setMachines] = useState(() => {
@@ -86,15 +117,41 @@ export default function FMCPortal() {
     return saved ? JSON.parse(saved) : INITIAL_ORDERS;
   });
 
-  // Filter purchase orders relevant to FMC Dealership
+  // Filter purchase orders relevant to this active FMC Dealership
   const purchaseOrders = useMemo(() => {
-    return orders.filter(o => o.type === 'purchase');
-  }, [orders]);
+    return orders.filter(o => {
+      if (o.type !== 'purchase') return false;
+      const dealerTarget = (o.dealer || o.fmcShop || o.seller || '').toLowerCase();
+      const activeName = (activeDealer.name || '').toLowerCase();
+      const activeCity = (activeDealer.city || activeDealer.village || '').toLowerCase();
+      if (!dealerTarget) return true; // generic purchase order visible to active console
+      return dealerTarget.includes(activeName) || activeName.includes(dealerTarget) || (activeCity && dealerTarget.includes(activeCity));
+    });
+  }, [orders, activeDealer]);
 
-  // Dealership catalog models
+  // Dealership catalog models - specifically filtered to FMC inventory
   const dealerCatalog = useMemo(() => {
-    return machines.filter(m => m.purchaseInfo?.msrp > 0);
-  }, [machines]);
+    return machines.filter(m => {
+      // Must have commercial purchase info
+      if (!m.purchaseInfo || !m.purchaseInfo.msrp) return false;
+      // Exclude CHC-only implements
+      if (m.isChcOnly || m.type === 'chc') return false;
+
+      const mDealerId = m.purchaseInfo?.dealerId || m.dealerId;
+      const mDealerName = (m.purchaseInfo?.dealer || m.dealerName || m.purchaseInfo?.dealers?.[0]?.name || '').toLowerCase();
+      const activeName = (activeDealer.name || '').toLowerCase();
+      const activeCity = (activeDealer.city || activeDealer.village || '').toLowerCase();
+
+      if (mDealerId) {
+        return mDealerId === activeDealer.id;
+      }
+      if (mDealerName) {
+        return mDealerName.includes(activeName) || activeName.includes(mDealerName) || (activeCity && mDealerName.includes(activeCity));
+      }
+      // If no specific dealer assigned yet, associate with primary dealer
+      return activeDealer.id === 'fmc-1';
+    });
+  }, [machines, activeDealer]);
 
   // Modal & Edit State
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -174,6 +231,11 @@ export default function FMCPortal() {
       id: `m-fmc-${Date.now()}`,
       name: newDealerForm.name.trim(),
       telugu: newDealerForm.telugu.trim() || newDealerForm.name.trim(),
+      type: 'fmc',
+      isFmc: true,
+      isChc: false,
+      dealerId: activeDealer.id,
+      dealerName: activeDealer.name,
       operationId: opObj.id,
       operationName: opObj.name,
       category: newDealerForm.category,
@@ -191,29 +253,20 @@ export default function FMCPortal() {
         'Fuel Consumption': newDealerForm.fuelType,
         'Field Capacity': newDealerForm.capacity,
         'Dealership': activeDealer.name,
-        'Dealer Contact': `${activeDealer.dealerOwner} (${activeDealer.phone})`,
+        'Dealer Contact': `${activeDealer.dealerOwner || activeDealer.inCharge} (${activeDealer.phone})`,
         'Warranty': newDealerForm.warranty
-      },
-      chcAvailability: {
-        total: 2,
-        available: 2,
-        rateHourly: 650,
-        rateDaily: 4800,
-        ratePerAcre: 1200,
-        deposit: 1500,
-        chcHub: activeDealer.village + ' Central Area',
-        operatorAvailable: true,
-        operatorRateExtra: 150
       },
       purchaseInfo: {
         msrp: msrpNum,
         subsidyPercent: subPct,
         subsidyAmount: subsidyAmount,
         effectivePrice: effectivePrice,
+        dealer: activeDealer.name,
+        dealerId: activeDealer.id,
         dealers: [
           {
             name: activeDealer.name,
-            city: activeDealer.district,
+            city: activeDealer.district || activeDealer.city,
             contact: activeDealer.phone,
             stockUnits: Number(newDealerForm.stockUnits) || 3
           }
@@ -294,7 +347,7 @@ export default function FMCPortal() {
               🏪
             </div>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                 <span className="badge badge-purple">Farm Machinery Commercial (FMC) Dealer Console</span>
                 <span className="badge badge-green">Authorized Dealership Mode</span>
               </div>
@@ -302,12 +355,29 @@ export default function FMCPortal() {
                 {activeDealer.name}
               </h1>
               <p className="text-secondary" style={{ fontSize: '12px', margin: 0 }}>
-                📍 {activeDealer.village}, {activeDealer.district} · Proprietor: <strong>{activeDealer.dealerOwner}</strong> (📱 {activeDealer.phone}) · GST: <code>{activeDealer.gstNumber}</code> · Role: <code>fmc_dealer</code>
+                📍 {activeDealer.city || activeDealer.village || 'Nalgonda'}, {activeDealer.district || 'Nalgonda'} · Proprietor: <strong>{activeDealer.inCharge || activeDealer.dealerOwner || 'Authorized Proprietor'}</strong> (📱 {activeDealer.phone || '9848011223'}) · GST: <code>{activeDealer.gstin || activeDealer.gstNumber || '36AAACL8912P1ZX'}</code> · Role: <code>fmc_dealer</code>
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
+            {/* Dealership Switcher */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>DEALER:</span>
+              <select
+                className="input-field select-field"
+                value={activeDealer.id}
+                onChange={e => setSelectedDealerId(e.target.value)}
+                style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
+              >
+                {fmcDealers.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {d.name} ({d.city || d.village || d.district})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <button
               className="btn btn-primary"
               onClick={() => setShowUploadModal(true)}

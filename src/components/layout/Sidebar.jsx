@@ -69,12 +69,11 @@ const NAV_ITEMS = [
   },
   { 
     path: '/market',      
-    label: 'Market & CHC',    
+    label: 'Market',    
     icon: <ShoppingCart size={20}/>,      
     roles: ['farmer','facilitator','management'],
     submenus: [
       { path: '/market?tab=Market Prices', label: 'Market Prices', roles: ['farmer','facilitator','management'] },
-      { path: '/market?tab=Equipment Hire', label: 'Equipment Hire', roles: ['farmer','facilitator','management'] },
       { path: '/market?tab=Input Store', label: 'Input Store', roles: ['farmer','facilitator','management'] }
     ]
   },
@@ -85,6 +84,8 @@ const NAV_ITEMS = [
     roles: ['farmer','facilitator','management'],
     submenus: [
       { path: '/learning?tab=Digital Library', label: 'Digital Library', roles: ['farmer','facilitator','management'] },
+      { path: '/learning?tab=CHC Machinery', label: 'CHC Machinery', roles: ['farmer','facilitator','management'] },
+      { path: '/learning?tab=FMC Machinery', label: 'FMC Machinery', roles: ['farmer','facilitator','management'] },
       { path: '/learning?tab=Success Stories', label: 'Success Stories', roles: ['farmer','facilitator','management'] },
       { path: '/learning?tab=Traditional Grains', label: 'Traditional Grains', roles: ['farmer','facilitator','management'] }
     ]
