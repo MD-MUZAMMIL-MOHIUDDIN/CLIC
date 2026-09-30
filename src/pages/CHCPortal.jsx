@@ -18,6 +18,13 @@ export default function CHCPortal() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Role permissions
+  const isSuperAdmin = user?.role === 'superadmin' || user?.roles?.includes('superadmin');
+  const isManagement = user?.role === 'management' || user?.roles?.includes('management');
+  const isFacilitator = user?.role === 'facilitator' || user?.roles?.includes('facilitator');
+  const isAdminOrFacilitator = isSuperAdmin || isManagement || isFacilitator;
+  const isChcOperator = user?.role === 'chc_operator' || user?.roles?.includes('chc_operator');
+
   // Load Custom Hubs & Machines from localStorage
   const [chcHubs] = useState(() => {
     const saved = localStorage.getItem('clic_custom_chc');
@@ -63,16 +70,17 @@ export default function CHCPortal() {
     return chcHubs[0]?.id || 'chc-1';
   });
 
-  // Current active CHC Hub
+  // Current active CHC Hub (Pinned for chc_operator)
   const activeHub = useMemo(() => {
-    const found = chcHubs.find(h => h.id === selectedHubId);
-    if (found) return found;
-    if (user?.email) {
+    if (isChcOperator && user?.email) {
       const match = chcHubs.find(h => h.email?.toLowerCase() === user.email.toLowerCase());
       if (match) return match;
     }
+    const found = chcHubs.find(h => h.id === selectedHubId);
+    if (found) return found;
     return chcHubs[0];
-  }, [chcHubs, selectedHubId, user]);
+  }, [chcHubs, selectedHubId, isChcOperator, user]);
+
 
   // Master Machines State
   const [machines, setMachines] = useState(() => {
@@ -343,22 +351,25 @@ export default function CHCPortal() {
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
-            {/* CHC Hub Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>CHC HUB:</span>
-              <select
-                className="input-field select-field"
-                value={activeHub.id}
-                onChange={e => setSelectedHubId(e.target.value)}
-                style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
-              >
-                {chcHubs.map(h => (
-                  <option key={h.id} value={h.id}>
-                    {h.name} ({h.village || h.city || h.district})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* CHC Hub Switcher for Admins/Facilitators */}
+            {isAdminOrFacilitator && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>CHC HUB:</span>
+                <select
+                  className="input-field select-field"
+                  value={activeHub.id}
+                  onChange={e => setSelectedHubId(e.target.value)}
+                  style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
+                >
+                  {chcHubs.map(h => (
+                    <option key={h.id} value={h.id}>
+                      {h.name} ({h.village || h.city || h.district})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
 
             <button
               className="btn btn-primary"

@@ -18,6 +18,13 @@ export default function FMCPortal() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Role permissions
+  const isSuperAdmin = user?.role === 'superadmin' || user?.roles?.includes('superadmin');
+  const isManagement = user?.role === 'management' || user?.roles?.includes('management');
+  const isFacilitator = user?.role === 'facilitator' || user?.roles?.includes('facilitator');
+  const isAdminOrFacilitator = isSuperAdmin || isManagement || isFacilitator;
+  const isFmcDealer = user?.role === 'fmc_dealer' || user?.roles?.includes('fmc_dealer');
+
   // Load Custom FMC Dealerships from localStorage
   const [fmcDealers, setFmcDealers] = useState(() => {
     const saved = localStorage.getItem('clic_custom_fmc');
@@ -73,14 +80,14 @@ export default function FMCPortal() {
     return fmcDealers[0]?.id || 'fmc-1';
   });
 
-  // Current active FMC Dealership
+  // Current active FMC Dealership (Pinned for fmc_dealer)
   const activeDealer = useMemo(() => {
-    const found = fmcDealers.find(d => d.id === selectedDealerId);
-    if (found) return found;
-    if (user?.email) {
+    if (isFmcDealer && user?.email) {
       const match = fmcDealers.find(d => d.email?.toLowerCase() === user.email.toLowerCase());
       if (match) return match;
     }
+    const found = fmcDealers.find(d => d.id === selectedDealerId);
+    if (found) return found;
     return fmcDealers[0] || {
       id: 'fmc-1',
       name: 'Sri Lakshmi Agro Automotives & Dealership',
@@ -91,7 +98,8 @@ export default function FMCPortal() {
       district: 'Nalgonda',
       gstNumber: '36AAACL8912P1ZX'
     };
-  }, [fmcDealers, selectedDealerId, user]);
+  }, [fmcDealers, selectedDealerId, isFmcDealer, user]);
+
 
   // Master Machines State
   const [machines, setMachines] = useState(() => {
@@ -361,22 +369,25 @@ export default function FMCPortal() {
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', alignItems: 'center' }}>
-            {/* Dealership Switcher */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>DEALER:</span>
-              <select
-                className="input-field select-field"
-                value={activeDealer.id}
-                onChange={e => setSelectedDealerId(e.target.value)}
-                style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
-              >
-                {fmcDealers.map(d => (
-                  <option key={d.id} value={d.id}>
-                    {d.name} ({d.city || d.village || d.district})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Dealership Switcher for Admins/Facilitators */}
+            {isAdminOrFacilitator && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-text-muted)' }}>DEALER:</span>
+                <select
+                  className="input-field select-field"
+                  value={activeDealer.id}
+                  onChange={e => setSelectedDealerId(e.target.value)}
+                  style={{ padding: '6px 10px', fontSize: '12px', minWidth: '180px' }}
+                >
+                  {fmcDealers.map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.name} ({d.city || d.village || d.district})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
 
             <button
               className="btn btn-primary"

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Bell, MapPin, LogOut, Menu } from 'lucide-react';
+import { Bell, MapPin, LogOut, Menu } from 'lucide-react';
 import { alerts } from '../../data/weatherData';
 import '../../styles/header.css';
 
@@ -18,15 +18,9 @@ const FARMER_NAV = [
 export default function Header({ sidebarCollapsed, onMenuToggle }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [searchVal, setSearchVal] = useState('');
   const [showNotifs, setShowNotifs] = useState(false);
-  const [lang, setLang] = useState('EN');
 
   const unread = alerts.filter(a => a.type === 'danger').length;
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-  };
 
   const handleLogout = () => {
     logout();
@@ -54,7 +48,7 @@ export default function Header({ sidebarCollapsed, onMenuToggle }) {
       </div>
 
       {/* Top Navigation for Farmer (instead of sidebar) */}
-      {isFarmer ? (
+      {isFarmer && (
         <nav className="header-nav">
           {FARMER_NAV.map(item => (
             <NavLink
@@ -67,43 +61,17 @@ export default function Header({ sidebarCollapsed, onMenuToggle }) {
             </NavLink>
           ))}
         </nav>
-      ) : (
-        /* Search Bar for Admin/Facilitator only */
-        <form className="header-search" onSubmit={handleSearch}>
-          <Search size={16} className="search-icon" />
-          <input
-            type="search"
-            className="search-input"
-            placeholder="Search crops, schemes, market prices..."
-            value={searchVal}
-            onChange={e => setSearchVal(e.target.value)}
-            id="header-search-input"
-          />
-        </form>
       )}
 
       {/* Right actions */}
-      <div className="header-actions">
-        {/* Language Toggle */}
-        <div className="lang-toggle">
-          {['EN', 'తె', 'हि'].map(l => (
-            <button
-              key={l}
-              className={`lang-btn ${lang === l ? 'active' : ''}`}
-              onClick={() => setLang(l)}
-              title={l === 'EN' ? 'English' : l === 'తె' ? 'Telugu' : 'Hindi'}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
-
+      <div className="header-actions" style={{ marginLeft: 'auto' }}>
         {/* Notifications */}
         <div className="notif-wrapper">
           <button
             className="header-icon-btn"
             onClick={() => setShowNotifs(!showNotifs)}
             id="notifications-btn"
+            aria-label="View notifications"
           >
             <Bell size={18} />
             {unread > 0 && <span className="notif-badge">{unread}</span>}

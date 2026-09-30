@@ -46,7 +46,20 @@ const DEFAULT_ROLES = [
     color: 'badge-fmc_dealer', 
     isDefault: true
   },
+  { 
+    id: ROLES.STORE_MANAGER, 
+    label: 'Input Store Manager', 
+    color: 'badge-store_manager', 
+    isDefault: true
+  },
+  { 
+    id: ROLES.LIVESTOCK_ENTREPRENEUR, 
+    label: 'Livestock Entrepreneur', 
+    color: 'badge-livestock_entrepreneur', 
+    isDefault: true
+  },
 ];
+
 
 export default function AdminPortal() {
   const { user } = useAuth();

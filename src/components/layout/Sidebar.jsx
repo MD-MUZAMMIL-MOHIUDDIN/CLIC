@@ -5,12 +5,13 @@ import {
   LayoutDashboard, CloudRain, Sprout, BookOpen,
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
-  ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck, Settings
+  ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck, Settings,
+  ShoppingBag, Activity
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
 const NAV_ITEMS = [
-  { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management','chc_operator','fmc_dealer'] },
+  { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management','chc_operator','fmc_dealer','store_manager','livestock_entrepreneur'] },
   { 
     path: '/admin',       
     label: 'Admin Console',  
@@ -56,6 +57,19 @@ const NAV_ITEMS = [
     icon: <Store size={20}/>,
     roles: ['fmc_dealer','facilitator','management']
   },
+  {
+    path: '/input-store-portal',
+    label: 'Input Store Hub',
+    icon: <ShoppingBag size={20}/>,
+    roles: ['store_manager','facilitator','management']
+  },
+  {
+    path: '/livestock-portal',
+    label: 'LS Entrepreneur Hub',
+    icon: <Activity size={20}/>,
+    roles: ['livestock_entrepreneur','facilitator','management']
+  },
+
   { 
     path: '/advisory',    
     label: 'Advisory',        

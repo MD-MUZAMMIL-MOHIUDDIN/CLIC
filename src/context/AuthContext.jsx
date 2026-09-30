@@ -9,6 +9,8 @@ export const ROLES = {
   FARMER: 'farmer',
   CHC_OPERATOR: 'chc_operator',
   FMC_DEALER: 'fmc_dealer',
+  STORE_MANAGER: 'store_manager',
+  LIVESTOCK_ENTREPRENEUR: 'livestock_entrepreneur',
 };
 
 const DEFAULT_USERS = [
@@ -18,7 +20,10 @@ const DEFAULT_USERS = [
   { id: 3, name: 'PJK Committee Admin',   phone: '9848099000', email: 'management@clic.in',   role: ROLES.MANAGEMENT,    roles: [ROLES.MANAGEMENT], village: 'District Level', district: 'Nalgonda',  state: 'Telangana', avatar: '🏛️',  designation: 'Management Committee', password: 'clic@2025', status: 'Active' },
   { id: 4, name: 'Kishan CHC Supervisor', phone: '9876500112', email: 'chc@clic.in',          role: ROLES.CHC_OPERATOR,  roles: [ROLES.CHC_OPERATOR],village: 'Chandampet Hub', district: 'Nalgonda', state: 'Telangana', avatar: '🚜',  designation: 'CHC Center In-Charge', password: 'clic@2025', status: 'Active' },
   { id: 5, name: 'Rajesh FMC Dealer',     phone: '9440188772', email: 'fmc@clic.in',          role: ROLES.FMC_DEALER,    roles: [ROLES.FMC_DEALER], village: 'Nalgonda Town',  district: 'Nalgonda',  state: 'Telangana', avatar: '🏪',  designation: 'Authorized FM Dealership', password: 'clic@2025', status: 'Active' },
+  { id: 6, name: 'Ramchander Input Lead', phone: '9876500334', email: 'inputstore@clic.in',   role: ROLES.STORE_MANAGER, roles: [ROLES.STORE_MANAGER], village: 'Chandampet Store', district: 'Nalgonda', state: 'Telangana', avatar: '🏬', designation: 'PACS Bio-Input Store In-Charge', password: 'clic@2025', status: 'Active' },
+  { id: 7, name: 'Mallesh LS Entrepreneur', phone: '9876511223', email: 'livestock@clic.in', role: ROLES.LIVESTOCK_ENTREPRENEUR, roles: [ROLES.LIVESTOCK_ENTREPRENEUR], village: 'Chandampet Hub', district: 'Nalgonda', state: 'Telangana', avatar: '🐄', designation: 'Livestock Entrepreneur & Mart', password: 'clic@2025', status: 'Active' },
 ];
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

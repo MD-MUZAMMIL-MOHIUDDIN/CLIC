@@ -11,6 +11,8 @@ const DEMO_CREDENTIALS = [
   { role: 'Farmer', phone: '9876543210', email: 'farmer@clic.in', password: 'clic@2025', icon: '👨‍🌾', desc: 'Mobile: 9876543210' },
   { role: 'CHC Hub', phone: '9876500112', email: 'chc@clic.in', password: 'clic@2025', icon: '🚜', desc: 'Mobile: 9876500112' },
   { role: 'FMC Shop', phone: '9440188772', email: 'fmc@clic.in', password: 'clic@2025', icon: '🏪', desc: 'Mobile: 9440188772' },
+  { role: 'Input Store', phone: '9876500334', email: 'inputstore@clic.in', password: 'clic@2025', icon: '🏬', desc: 'Mobile: 9876500334' },
+  { role: 'LS Mart', phone: '9876511223', email: 'livestock@clic.in', password: 'clic@2025', icon: '🐄', desc: 'Mobile: 9876511223' },
 ];
 
 export default function Login() {
@@ -35,6 +37,10 @@ export default function Login() {
         navigate('/chc-portal');
       } else if (result.user?.role === 'fmc_dealer') {
         navigate('/fmc-portal');
+      } else if (result.user?.role === 'store_manager') {
+        navigate('/input-store-portal');
+      } else if (result.user?.role === 'livestock_entrepreneur') {
+        navigate('/livestock-portal');
       } else {
         navigate('/');
       }
@@ -43,6 +49,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
 
   const quickLogin = (cred, usePhone = true) => {
     setIdentifier(usePhone ? cred.phone : cred.email);

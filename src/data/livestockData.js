@@ -1,6 +1,9 @@
 // ============================================================
-// Livestock Advisory & Health Management Data Model
+// Livestock Advisory, Health Management & Enterprise Data Model
 // ============================================================
+
+export { INITIAL_LIVESTOCK_SHOPS, livestockShops } from './livestockShops';
+export { DEFAULT_LIVESTOCK_PRODUCTS, livestockProducts, livestockProductCategories } from './livestockProducts';
 
 export const livestock = [
   {

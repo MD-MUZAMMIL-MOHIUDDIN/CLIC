@@ -16,6 +16,8 @@ import Locations from './pages/Locations';
 import FarmMachinery from './pages/FarmMachinery';
 import CHCPortal from './pages/CHCPortal';
 import FMCPortal from './pages/FMCPortal';
+import InputStorePortal from './pages/InputStorePortal';
+import LivestockPortal from './pages/LivestockPortal';
 import AdminPortal from './pages/AdminPortal';
 import ManageHub from './pages/ManageHub';
 
@@ -34,6 +36,8 @@ export default function App() {
               <Route path="farm-machinery" element={<FarmMachinery />} />
               <Route path="chc-portal" element={<CHCPortal />} />
               <Route path="fmc-portal" element={<FMCPortal />} />
+              <Route path="input-store-portal" element={<InputStorePortal />} />
+              <Route path="livestock-portal" element={<LivestockPortal />} />
               <Route path="weather" element={<Weather />} />
               <Route path="advisory" element={<Advisory />} />
               <Route path="groundwater" element={<Groundwater />} />
@@ -49,5 +53,6 @@ export default function App() {
     </AuthProvider>
   );
 }
+
 
 
