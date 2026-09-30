@@ -573,9 +573,12 @@ export default function FMCPortal() {
                   <tr key={m.id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <img src={m.thumbnail} alt={m.name} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
+                        <img src={m.thumbnailImageUrl || m.thumbnail} alt={m.machineName || m.name} style={{ width: 40, height: 40, borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
                         <div>
-                          <strong style={{ fontSize: '12px' }}>{m.name}</strong>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span className="badge badge-sky" style={{ fontSize: '9px', padding: '1px 5px' }}>{m.machineId || `FM_${m.id}`}</span>
+                            <strong style={{ fontSize: '12px' }}>{m.machineName || m.name}</strong>
+                          </div>
                           <div style={{ fontSize: '11px', color: 'var(--color-forest)', fontFamily: 'var(--font-telugu)' }}>{m.telugu}</div>
                         </div>
                       </div>

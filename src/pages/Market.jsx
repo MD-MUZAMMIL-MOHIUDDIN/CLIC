@@ -399,7 +399,18 @@ function InputStoreView({ inputProducts }) {
               </span>
             </div>
             <div className="input-name">{item.name}</div>
+            {item.storeName && (
+              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span>🏪 {item.storeName}</span>
+                {item.storeVillage && <span className="text-muted">({item.storeVillage})</span>}
+              </div>
+            )}
             <div className="input-desc">{item.description}</div>
+            {item.dosage && (
+              <div style={{ fontSize: '11px', color: 'var(--color-primary)', marginTop: '4px', fontStyle: 'italic' }}>
+                💊 Dosage: {item.dosage}
+              </div>
+            )}
             <div className="input-footer" style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-3)', marginTop: 'var(--space-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div className="input-price">₹{item.price}<span>/{item.unit}</span></div>
               <span className="text-secondary" style={{ fontSize: '11px' }}>Available: <strong>{item.stock} {item.unit}s</strong></span>

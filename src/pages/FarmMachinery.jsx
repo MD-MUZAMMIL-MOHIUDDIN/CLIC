@@ -249,9 +249,9 @@ export default function FarmMachinery() {
     try {
       const parsed = JSON.parse(saved);
       return parsed.map(m => {
-        const def = FARM_MACHINES.find(d => d.id === m.id);
-        if (def && m.id === 'm1') {
-          return { ...m, thumbnail: def.thumbnail, gallery: def.gallery };
+        const def = FARM_MACHINES.find(d => d.id === m.id || (m.machineId && d.machineId === m.machineId));
+        if (def) {
+          return { ...def, ...m };
         }
         return m;
       });
@@ -264,19 +264,28 @@ export default function FarmMachinery() {
   const [showUploadMachineModal, setShowUploadMachineModal] = useState(false);
   const [quickEditMachine, setQuickEditMachine] = useState(null);
 
-  // Form state for CHC & FMC Equipment Upload
+  // Form state for CHC & FMC Equipment Upload with all 10 core fields + extra specs
   const [newMachineForm, setNewMachineForm] = useState({
+    machineId: '',
     name: '',
     telugu: '',
+    operationType: 'Tillage',
     operationId: 'land-prep',
     category: 'Tractor & Heavy Implements',
     powerHP: '50 HP',
     fuelType: 'Diesel (4.0 L/hr)',
     capacity: '2.5 acres/day',
     brand: 'Mahindra & Mahindra',
+    thumbnailImageUrl: 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
     thumbnail: 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
+    shortDescription: '',
+    fullTechnicalDescription: '',
+    galleryMediaUrls: '',
+    demoVideoUrl: 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
     videoUrl: 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
     videoTitle: 'Field Demonstration & Operation Video',
+    purchasable: 'Yes',
+    rentable: 'Yes',
     description: '',
     // CHC Linkage
     chcHubId: 'chc-1',
@@ -733,10 +742,37 @@ export default function FarmMachinery() {
     const subsidyAmount = Math.round(msrpVal * (subPercent / 100));
     const effectivePrice = msrpVal - subsidyAmount;
 
+    // Parse gallery media URLs if provided as string or array
+    let galleryArr = [
+      newMachineForm.thumbnailImageUrl || newMachineForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80'
+    ];
+    if (newMachineForm.galleryMediaUrls) {
+      if (Array.isArray(newMachineForm.galleryMediaUrls)) {
+        galleryArr = newMachineForm.galleryMediaUrls;
+      } else if (typeof newMachineForm.galleryMediaUrls === 'string') {
+        try {
+          if (newMachineForm.galleryMediaUrls.trim().startsWith('[')) {
+            galleryArr = JSON.parse(newMachineForm.galleryMediaUrls);
+          } else {
+            galleryArr = newMachineForm.galleryMediaUrls.split(',').map(s => s.trim()).filter(Boolean);
+          }
+        } catch {
+          galleryArr = [newMachineForm.galleryMediaUrls.trim()];
+        }
+      }
+    }
+
+    const machId = newMachineForm.machineId?.trim() || `FM_${String(machines.length + 1).padStart(3, '0')}`;
+    const shortDesc = newMachineForm.shortDescription?.trim() || newMachineForm.description?.trim() || `${newMachineForm.name} suitable for ${selectedOp.name}.`;
+    const fullDesc = newMachineForm.fullTechnicalDescription?.trim() || newMachineForm.description?.trim() || `${newMachineForm.name} directly onboarded and maintained by ${selectedChc?.name || 'CHC Hub'} and authorized by ${selectedFmc?.name || 'FMC Dealership'}.`;
+
     const newMach = {
+      machineId: machId,
       id: `m-custom-${Date.now()}`,
+      machineName: newMachineForm.name.trim(),
       name: newMachineForm.name.trim(),
       telugu: newMachineForm.telugu.trim() || newMachineForm.name.trim(),
+      operationType: selectedOp.name.split('/')[0].trim(),
       operationId: selectedOp.id,
       operationName: selectedOp.name,
       category: newMachineForm.category,
@@ -744,13 +780,20 @@ export default function FarmMachinery() {
       fuelType: newMachineForm.fuelType,
       capacity: newMachineForm.capacity,
       brand: newMachineForm.brand,
-      thumbnail: newMachineForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
-      gallery: [
-        newMachineForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80'
-      ],
-      videoUrl: newMachineForm.videoUrl || 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
+      thumbnailImageUrl: newMachineForm.thumbnailImageUrl || newMachineForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
+      thumbnail: newMachineForm.thumbnailImageUrl || newMachineForm.thumbnail || 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
+      shortDescription: shortDesc,
+      fullTechnicalDescription: fullDesc,
+      description: fullDesc,
+      galleryMediaUrls: galleryArr,
+      gallery: galleryArr,
+      demoVideoUrl: newMachineForm.demoVideoUrl || newMachineForm.videoUrl || 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
+      videoUrl: newMachineForm.demoVideoUrl || newMachineForm.videoUrl || 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
       videoTitle: newMachineForm.videoTitle || `${newMachineForm.name} Field Operation Video`,
-      description: newMachineForm.description.trim() || `${newMachineForm.name} directly onboarded and maintained by ${selectedChc?.name || 'CHC Hub'} and authorized by ${selectedFmc?.name || 'FMC Dealership'}.`,
+      purchasable: newMachineForm.purchasable || 'Yes',
+      isPurchasable: (newMachineForm.purchasable === 'Yes'),
+      rentable: newMachineForm.rentable || 'Yes',
+      isRentable: (newMachineForm.rentable === 'Yes'),
       specs: {
         'Engine Power': newMachineForm.powerHP,
         'Fuel Type': newMachineForm.fuelType,
@@ -788,24 +831,34 @@ export default function FarmMachinery() {
 
     const updatedMachines = [newMach, ...machines];
     setMachines(updatedMachines);
+    localStorage.setItem('clic_custom_machines', JSON.stringify(updatedMachines));
     setSelectedMachine(newMach);
     setShowUploadMachineModal(false);
-    setQueryToast(`✓ New machine "${newMach.name}" uploaded and linked to ${selectedChc?.name || 'CHC Hub'}!`);
+    setQueryToast(`✓ New machine "${newMach.name}" [ID: ${newMach.machineId}] uploaded and linked to ${selectedChc?.name || 'CHC Hub'}!`);
     setTimeout(() => setQueryToast(null), 3500);
 
     // Reset form
     setNewMachineForm({
+      machineId: '',
       name: '',
       telugu: '',
+      operationType: 'Tillage',
       operationId: 'land-prep',
       category: 'Tractor & Heavy Implements',
       powerHP: '50 HP',
       fuelType: 'Diesel (4.0 L/hr)',
       capacity: '2.5 acres/day',
       brand: 'Mahindra & Mahindra',
+      thumbnailImageUrl: 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
       thumbnail: 'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=800&q=80',
+      shortDescription: '',
+      fullTechnicalDescription: '',
+      galleryMediaUrls: '',
+      demoVideoUrl: 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
       videoUrl: 'https://www.youtube-nocookie.com/embed/ScMzIvxBSi4',
       videoTitle: 'Field Demonstration & Operation Video',
+      purchasable: 'Yes',
+      rentable: 'Yes',
       description: '',
       chcHubId: chcHubs[0]?.id || 'chc-1',
       chcTotalUnits: 3,
@@ -2447,8 +2500,9 @@ export default function FarmMachinery() {
                             style={{ outline: isSelected ? '2px solid var(--color-forest)' : 'none' }}
                           >
                             <div className="machine-thumb-wrap">
-                              <img src={mach.thumbnail} alt={mach.name} className="machine-thumb-img" />
-                              <span className="machine-badge-op">{mach.operationName}</span>
+                              <img src={mach.thumbnailImageUrl || mach.thumbnail} alt={mach.machineName || mach.name} className="machine-thumb-img" />
+                              <span className="machine-badge-id">{mach.machineId || `FM_${mach.id}`}</span>
+                              <span className="machine-badge-op">{mach.operationType || mach.operationName}</span>
                               <span className={`machine-badge-avail ${availClass}`}>
                                 {avail > 0 ? `🟢 ${avail} / ${total} Available` : '🔴 Busy / Out on Rent'}
                               </span>
@@ -2456,8 +2510,20 @@ export default function FarmMachinery() {
 
                             <div className="machine-card-body">
                               <div>
-                                <div className="machine-title">{mach.name}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                                  <div className="machine-title">{mach.machineName || mach.name}</div>
+                                </div>
                                 <div className="machine-telugu">{mach.telugu}</div>
+                              </div>
+
+                              {/* Purchasable & Rentable Badges */}
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <span className="machine-tag-purchasable">
+                                  🛒 Purchasable: {mach.purchasable || (mach.isPurchasable ? 'Yes' : 'No')}
+                                </span>
+                                <span className="machine-tag-rentable">
+                                  🚜 Rentable: {mach.rentable || (mach.isRentable ? 'Yes' : 'No')}
+                                </span>
                               </div>
 
                               {/* Linked CHC Hub & FMC Dealer tags */}
@@ -2486,8 +2552,8 @@ export default function FarmMachinery() {
                                 <span className="spec-pill">⏱️ {mach.capacity}</span>
                               </div>
 
-                              <p className="text-secondary" style={{ fontSize: '12px', margin: 0, lineClamp: 2, display: '-webkit-box', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {mach.description}
+                              <p className="machine-short-desc">
+                                {mach.shortDescription || mach.description}
                               </p>
 
                               <div className="machine-pricing-row">
@@ -4091,9 +4157,23 @@ export default function FarmMachinery() {
           <div className="details-modal" onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
             <div className="modal-header-bar">
-              <div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  <span className="badge badge-sky" style={{ fontWeight: 'bold' }}>
+                    {detailModalMachine.machineId || `FM_${detailModalMachine.id}`}
+                  </span>
+                  <span className="badge badge-forest">
+                    {detailModalMachine.operationType || detailModalMachine.operationName}
+                  </span>
+                  <span className="machine-tag-purchasable">
+                    🛒 Purchasable: {detailModalMachine.purchasable || (detailModalMachine.isPurchasable ? 'Yes' : 'No')}
+                  </span>
+                  <span className="machine-tag-rentable">
+                    🚜 Rentable: {detailModalMachine.rentable || (detailModalMachine.isRentable ? 'Yes' : 'No')}
+                  </span>
+                </div>
                 <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'bold', margin: 0 }}>
-                  {detailModalMachine.name}
+                  {detailModalMachine.machineName || detailModalMachine.name}
                 </h3>
                 <div style={{ fontSize: '12px', color: 'var(--color-forest)', fontFamily: 'var(--font-telugu)' }}>
                   {detailModalMachine.telugu} · {detailModalMachine.operationName}
@@ -4136,12 +4216,12 @@ export default function FarmMachinery() {
               {modalTab === 'video' && (
                 <div>
                   <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 'bold', marginBottom: '8px' }}>
-                    {detailModalMachine.videoTitle}
+                    {detailModalMachine.videoTitle || `${detailModalMachine.machineName || detailModalMachine.name} Demonstration`}
                   </h4>
                   <div className="video-container">
                     <iframe
-                      src={detailModalMachine.videoUrl}
-                      title={detailModalMachine.videoTitle}
+                      src={detailModalMachine.demoVideoUrl || detailModalMachine.videoUrl}
+                      title={detailModalMachine.videoTitle || detailModalMachine.name}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
@@ -4162,11 +4242,11 @@ export default function FarmMachinery() {
                     High-Resolution Machine Gallery & Implements
                   </h4>
                   <div className="gallery-grid">
-                    {detailModalMachine.gallery.map((imgUrl, i) => (
+                    {(detailModalMachine.galleryMediaUrls || detailModalMachine.gallery || [detailModalMachine.thumbnailImageUrl || detailModalMachine.thumbnail]).map((imgUrl, i) => (
                       <img
                         key={i}
                         src={imgUrl}
-                        alt={`${detailModalMachine.name} view ${i + 1}`}
+                        alt={`${detailModalMachine.machineName || detailModalMachine.name} view ${i + 1}`}
                         className="gallery-img"
                       />
                     ))}
@@ -4177,22 +4257,47 @@ export default function FarmMachinery() {
               {/* Tab 3: Text & Specifications */}
               {modalTab === 'text' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                  {detailModalMachine.shortDescription && (
+                    <div style={{ background: 'rgba(37, 99, 235, 0.06)', borderLeft: '3px solid var(--color-forest)', padding: '10px 14px', borderRadius: 'var(--radius-sm)' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--color-forest)', textTransform: 'uppercase' }}>Short Summary</span>
+                      <p style={{ margin: '4px 0 0 0', fontSize: 'var(--text-sm)', color: 'var(--color-text-primary)' }}>
+                        {detailModalMachine.shortDescription}
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <h4 style={{ fontSize: 'var(--text-base)', fontWeight: 'bold', marginBottom: '4px' }}>
-                      Comprehensive Machine Overview
+                      Full Technical Description
                     </h4>
                     <p className="text-secondary" style={{ fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>
-                      {detailModalMachine.description}
+                      {detailModalMachine.fullTechnicalDescription || detailModalMachine.description}
                     </p>
                   </div>
 
                   <div>
                     <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'bold', marginBottom: '8px' }}>
-                      Technical Specifications
+                      Technical Specifications & Parameters
                     </h4>
                     <table className="specs-table">
                       <tbody>
-                        {Object.entries(detailModalMachine.specs).map(([key, val]) => (
+                        <tr>
+                          <td>Machine ID</td>
+                          <td><strong>{detailModalMachine.machineId || `FM_${detailModalMachine.id}`}</strong></td>
+                        </tr>
+                        <tr>
+                          <td>Operation Type</td>
+                          <td><strong>{detailModalMachine.operationType || detailModalMachine.operationName}</strong></td>
+                        </tr>
+                        <tr>
+                          <td>Purchasable Status</td>
+                          <td><strong>{detailModalMachine.purchasable || (detailModalMachine.isPurchasable ? 'Yes' : 'No')}</strong></td>
+                        </tr>
+                        <tr>
+                          <td>Rentable Status</td>
+                          <td><strong>{detailModalMachine.rentable || (detailModalMachine.isRentable ? 'Yes' : 'No')}</strong></td>
+                        </tr>
+                        {detailModalMachine.specs && Object.entries(detailModalMachine.specs).map(([key, val]) => (
                           <tr key={key}>
                             <td>{key}</td>
                             <td>{val}</td>
@@ -4206,13 +4311,13 @@ export default function FarmMachinery() {
                     <div className="card" style={{ background: 'var(--color-bg-elevated)', padding: '10px' }}>
                       <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>CHC Rental Pricing</span>
                       <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'var(--color-mint)' }}>
-                        ₹{detailModalMachine.chcAvailability.rateHourly}/hr · ₹{detailModalMachine.chcAvailability.rateDaily}/day
+                        ₹{detailModalMachine.chcAvailability?.rateHourly}/hr · ₹{detailModalMachine.chcAvailability?.rateDaily}/day
                       </div>
                     </div>
                     <div className="card" style={{ background: 'var(--color-bg-elevated)', padding: '10px' }}>
                       <span style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>Purchase Subsidized Price</span>
                       <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'var(--color-forest)' }}>
-                        ₹{detailModalMachine.purchaseInfo.effectivePrice.toLocaleString()} ({detailModalMachine.purchaseInfo.subsidyPercent}% Subsidy)
+                        ₹{detailModalMachine.purchaseInfo?.effectivePrice?.toLocaleString()} ({detailModalMachine.purchaseInfo?.subsidyPercent}% Subsidy)
                       </div>
                     </div>
                   </div>
@@ -4280,38 +4385,34 @@ export default function FarmMachinery() {
 
             <form onSubmit={handleCreateNewMachine} style={{ padding: 'var(--space-5)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <div className="machine-upload-grid">
-                {/* 1. General Info */}
+                {/* 1. Core Identification & Operation (Fields 1, 2, 3, Telugu) */}
                 <div className="machine-upload-section-title">
-                  <Tractor size={16} /> 1. Equipment Basic Info & Operation Category
+                  <Tractor size={16} /> 1. Machine Identification & Operation
                 </div>
 
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Equipment / Implement Name *</label>
+                <div className="form-group">
+                  <label>Machine ID (Field 1)</label>
                   <input
                     className="input-field"
-                    placeholder="e.g. Shakti Multi-Crop Pneumatic Planter (4-Row)"
-                    value={newMachineForm.name}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, name: e.target.value })}
-                    required
+                    placeholder={`e.g. FM_${String(machines.length + 1).padStart(3, '0')}`}
+                    value={newMachineForm.machineId}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, machineId: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Telugu Name (తెలుగు పేరు)</label>
-                  <input
-                    className="input-field"
-                    placeholder="e.g. శక్తి న్యూమాటిక్ ప్లాంటర్"
-                    value={newMachineForm.telugu}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, telugu: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Operation Category *</label>
+                  <label>Operation Type (Field 2) *</label>
                   <select
                     className="input-field select-field"
                     value={newMachineForm.operationId}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, operationId: e.target.value })}
+                    onChange={e => {
+                      const op = MACHINERY_OPERATIONS.find(o => o.id === e.target.value);
+                      setNewMachineForm({
+                        ...newMachineForm,
+                        operationId: e.target.value,
+                        operationType: op?.name.split('/')[0].trim() || 'Tillage'
+                      });
+                    }}
                     required
                   >
                     {MACHINERY_OPERATIONS.map(op => (
@@ -4320,49 +4421,157 @@ export default function FarmMachinery() {
                   </select>
                 </div>
 
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Machine Name (Field 3) *</label>
+                  <input
+                    className="input-field"
+                    placeholder="e.g. Multi-Crop High Output Thresher & Cleaner"
+                    value={newMachineForm.name}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Telugu Local Name (తెలుగు పేరు)</label>
+                  <input
+                    className="input-field"
+                    placeholder="e.g. మల్టీ క్రాప్ త్రెషర్ & క్లీనర్"
+                    value={newMachineForm.telugu}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, telugu: e.target.value })}
+                  />
+                </div>
+
                 <div className="form-group">
                   <label>Brand / Manufacturer</label>
                   <input
                     className="input-field"
-                    placeholder="e.g. Mahindra, Kubota, Aspee"
+                    placeholder="e.g. Mahindra, Kubota, CLAAS, Aspee"
                     value={newMachineForm.brand}
                     onChange={e => setNewMachineForm({ ...newMachineForm, brand: e.target.value })}
                   />
+                </div>
+
+                {/* 2. Availability & Commercial Status (Fields 9, 10 + Specs) */}
+                <div className="machine-upload-section-title">
+                  <ShoppingCart size={16} /> 2. Purchasable & Rentable Commercial Status
+                </div>
+
+                <div className="form-group">
+                  <label>Purchasable? (Field 9) *</label>
+                  <select
+                    className="input-field select-field"
+                    value={newMachineForm.purchasable}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, purchasable: e.target.value })}
+                    required
+                  >
+                    <option value="Yes">Yes (Available for Purchase via FMC)</option>
+                    <option value="No">No (Rental / Hiring Only)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Rentable? (Field 10) *</label>
+                  <select
+                    className="input-field select-field"
+                    value={newMachineForm.rentable}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, rentable: e.target.value })}
+                    required
+                  >
+                    <option value="Yes">Yes (Available for Rental via CHC)</option>
+                    <option value="No">No (Direct Purchase Only)</option>
+                  </select>
                 </div>
 
                 <div className="form-group">
                   <label>Power Rating (HP / kW)</label>
                   <input
                     className="input-field"
-                    placeholder="e.g. 45 HP or 12 V Battery"
+                    placeholder="e.g. 50 HP or 12 V Battery"
                     value={newMachineForm.powerHP}
                     onChange={e => setNewMachineForm({ ...newMachineForm, powerHP: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Fuel Type / Consumption</label>
+                  <label>Fuel Type / Drive</label>
                   <input
                     className="input-field"
-                    placeholder="e.g. Diesel (3.8 L/hr) or Solar DC"
+                    placeholder="e.g. Diesel (4.0 L/hr), Tractor PTO, Solar"
                     value={newMachineForm.fuelType}
                     onChange={e => setNewMachineForm({ ...newMachineForm, fuelType: e.target.value })}
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
                   <label>Daily Field Capacity</label>
                   <input
                     className="input-field"
-                    placeholder="e.g. 4.0 - 5.0 acres/day"
+                    placeholder="e.g. 2.5 - 3.5 acres/day or 1.5 tonnes/hr"
                     value={newMachineForm.capacity}
                     onChange={e => setNewMachineForm({ ...newMachineForm, capacity: e.target.value })}
                   />
                 </div>
 
-                {/* 2. CHC Hiring Fleet & Availability Link */}
+                {/* 3. Media & Descriptions (Fields 4, 5, 6, 7, 8) */}
                 <div className="machine-upload-section-title">
-                  <MapPin size={16} /> 2. Custom Hiring Center (CHC) Link & Rental Pricing
+                  <Play size={16} /> 3. Media Assets & Descriptions
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Thumbnail Image URL (Field 4)</label>
+                  <input
+                    className="input-field"
+                    placeholder="https://images.unsplash.com/..."
+                    value={newMachineForm.thumbnailImageUrl}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, thumbnailImageUrl: e.target.value, thumbnail: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Short Description (Field 5)</label>
+                  <input
+                    className="input-field"
+                    placeholder="e.g. Self-propelled walk-behind transplanter with uniform row spacing."
+                    value={newMachineForm.shortDescription}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, shortDescription: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label>Full Technical Description (Field 6)</label>
+                  <textarea
+                    className="input-field"
+                    rows={2}
+                    placeholder="e.g. High-throughput tangential threshing combine harvester capable of cutting, threshing, and cleaning grains in a single continuous pass..."
+                    value={newMachineForm.fullTechnicalDescription}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, fullTechnicalDescription: e.target.value, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Gallery Media URLs (JSON or Comma-Separated) (Field 7)</label>
+                  <input
+                    className="input-field"
+                    placeholder='["https://images.unsplash.com/...", "https://..."]'
+                    value={newMachineForm.galleryMediaUrls}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, galleryMediaUrls: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                  <label>Demo Video URL (YouTube Embed Link) (Field 8)</label>
+                  <input
+                    className="input-field"
+                    placeholder="https://www.youtube-nocookie.com/embed/..."
+                    value={newMachineForm.demoVideoUrl}
+                    onChange={e => setNewMachineForm({ ...newMachineForm, demoVideoUrl: e.target.value, videoUrl: e.target.value })}
+                  />
+                </div>
+
+                {/* 4. CHC Hiring Fleet & Rental Pricing */}
+                <div className="machine-upload-section-title">
+                  <MapPin size={16} /> 4. Custom Hiring Center (CHC) Link & Rental Pricing
                 </div>
 
                 <div className="form-group" style={{ gridColumn: 'span 2' }}>
@@ -4449,22 +4658,9 @@ export default function FarmMachinery() {
                   />
                 </div>
 
-                <div className="form-group" style={{ gridColumn: '1/-1', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input
-                    type="checkbox"
-                    id="newOpCheck"
-                    checked={newMachineForm.chcOperatorIncluded}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, chcOperatorIncluded: e.target.checked })}
-                    style={{ width: 16, height: 16 }}
-                  />
-                  <label htmlFor="newOpCheck" style={{ cursor: 'pointer', fontSize: '12px' }}>
-                    Trained CHC operator / technician service available for this implement
-                  </label>
-                </div>
-
-                {/* 3. FMC Dealership & Purchase Subsidy Link */}
+                {/* 5. FMC Dealership & Purchase Subsidy Link */}
                 <div className="machine-upload-section-title">
-                  <Building2 size={16} /> 3. FMC Dealership Link & Purchase Subsidy Rates
+                  <Building2 size={16} /> 5. FMC Dealership Link & Purchase Subsidy Rates
                 </div>
 
                 <div className="form-group" style={{ gridColumn: 'span 2' }}>
@@ -4504,42 +4700,6 @@ export default function FarmMachinery() {
                     className="input-field"
                     value={newMachineForm.subsidyPercent}
                     onChange={e => setNewMachineForm({ ...newMachineForm, subsidyPercent: Number(e.target.value) })}
-                  />
-                </div>
-
-                {/* 4. Media & Video Links */}
-                <div className="machine-upload-section-title">
-                  <Play size={16} /> 4. Demonstration Video & Equipment Photos
-                </div>
-
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Equipment Photo / Thumbnail URL</label>
-                  <input
-                    className="input-field"
-                    placeholder="https://images.unsplash.com/..."
-                    value={newMachineForm.thumbnail}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, thumbnail: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                  <label>Field Demonstration Video (YouTube Embed Link)</label>
-                  <input
-                    className="input-field"
-                    placeholder="https://www.youtube-nocookie.com/embed/..."
-                    value={newMachineForm.videoUrl}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, videoUrl: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group full-width">
-                  <label>Short Technical Overview & Soil Compatibility</label>
-                  <textarea
-                    className="input-field"
-                    rows={2}
-                    placeholder="e.g. Heavy duty rotavator with boron steel blades suited for red loam and black cotton soils."
-                    value={newMachineForm.description}
-                    onChange={e => setNewMachineForm({ ...newMachineForm, description: e.target.value })}
                   />
                 </div>
               </div>

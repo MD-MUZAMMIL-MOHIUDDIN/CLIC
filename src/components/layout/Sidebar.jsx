@@ -5,7 +5,7 @@ import {
   LayoutDashboard, CloudRain, Sprout, BookOpen,
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
-  ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck
+  ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck, Settings
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
@@ -21,6 +21,17 @@ const NAV_ITEMS = [
       { path: '/admin?tab=roles', label: 'Roles', roles: ['management'] }
     ]
   },
+  { 
+    path: '/manage',       
+    label: 'Ref & Dropdowns',  
+    icon: <Settings size={20}/>,      
+    roles: ['facilitator','management'],
+    submenus: [
+      { path: '/manage?tab=reftypes', label: 'Reference Types', roles: ['facilitator','management'] },
+      { path: '/manage?tab=dropdowns', label: 'Dropdown List', roles: ['facilitator','management'] }
+    ]
+  },
+
   { 
     path: '/machinery',   
     label: 'Facilitator Desk', 
