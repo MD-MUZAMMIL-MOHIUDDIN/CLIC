@@ -3,8 +3,8 @@
 // ============================================================
 
 export * from './cropsData';
-export * from './livestockData';
-export * from './fisheriesData';
+export * from '../livestock/livestockData';
+export * from '../fisheries/fisheriesData';
 
 // Learning Hub Video Tutorials
 export const videos = [

@@ -5,7 +5,7 @@ import {
   defaultStates,
   defaultDistricts,
   defaultVillages
-} from '../data/marketData';
+} from '../data/master/marketData';
 import { Plus, Trash2, MapPin, Edit2, Save, X } from 'lucide-react';
 import '../styles/market.css';
 

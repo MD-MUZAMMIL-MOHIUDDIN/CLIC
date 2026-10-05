@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { schemes as initialSchemes, schemeCategories as initialCategories } from '../data/schemes';
+import { schemes as initialSchemes, schemeCategories as initialCategories } from '../data/master/schemes';
 import {
   ChevronDown, ChevronUp, ExternalLink, FileText, Plus, Save,
   Edit2, Trash2, CheckCircle2, AlertCircle, X, Search, Building2

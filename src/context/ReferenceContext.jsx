@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { DEFAULT_REF_TYPES, getCreateAudit, getUpdateAudit } from '../data/referenceData';
-import { DEFAULT_DROPDOWN_LIST } from '../data/dropdownData';
-import { DEFAULT_CROP_CATEGORIES } from '../data/crop_categories';
-import { DEFAULT_CROP_LIST } from '../data/crop_list';
+import { DEFAULT_REF_TYPES, getCreateAudit, getUpdateAudit } from '../data/master/referenceData';
+import { DEFAULT_DROPDOWN_LIST } from '../data/master/dropdownData';
+import { DEFAULT_CROP_CATEGORIES } from '../data/crops/crop_categories';
+import { DEFAULT_CROP_LIST } from '../data/crops/crop_list';
+import { CROP_PESTS_DATA, CROP_DISEASES_DATA } from '../data/crops/cropPestDiseaseData';
+import { INITIAL_DISEASE_PRESCRIPTIONS } from '../data/crops/diseasePrescriptionsData';
 
 const ReferenceContext = createContext(null);
 
@@ -10,6 +12,9 @@ export const STORAGE_KEY_REF_TYPES = 'clic_ref_master_types';
 export const STORAGE_KEY_DROPDOWN_LIST = 'clic_dropdown_master_list';
 export const STORAGE_KEY_CROP_CATEGORIES = 'clic_crop_categories_master';
 export const STORAGE_KEY_CROP_LIST = 'clic_crop_list_master';
+export const STORAGE_KEY_CROP_PESTS = 'clic_crop_pests_master';
+export const STORAGE_KEY_CROP_DISEASES = 'clic_crop_diseases_master';
+export const STORAGE_KEY_DISEASE_PRESCRIPTIONS = 'clic_disease_prescriptions_master';
 
 export function ReferenceProvider({ children }) {
   // 1. Reference Types State (from referenceData.js)
@@ -78,6 +83,48 @@ export function ReferenceProvider({ children }) {
     return DEFAULT_CROP_LIST;
   });
 
+  // 5. Crop Pests Master State
+  const [cropPests, setCropPests] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CROP_PESTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load crop pests from storage', e);
+    }
+    return CROP_PESTS_DATA;
+  });
+
+  // 6. Crop Diseases Master State
+  const [cropDiseases, setCropDiseases] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_CROP_DISEASES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load crop diseases from storage', e);
+    }
+    return CROP_DISEASES_DATA;
+  });
+
+  // 7. Disease Prescriptions & Diagnosis Registry State
+  const [diseasePrescriptions, setDiseasePrescriptions] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_DISEASE_PRESCRIPTIONS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to load disease prescriptions from storage', e);
+    }
+    return INITIAL_DISEASE_PRESCRIPTIONS;
+  });
+
   // Save helpers
   const saveTypes = (newTypes) => {
     setRefTypes(newTypes);
@@ -94,6 +141,33 @@ export function ReferenceProvider({ children }) {
       localStorage.setItem(STORAGE_KEY_DROPDOWN_LIST, JSON.stringify(newList));
     } catch (e) {
       console.error('Failed to persist dropdown list', e);
+    }
+  };
+
+  const saveCropPests = (newList) => {
+    setCropPests(newList);
+    try {
+      localStorage.setItem(STORAGE_KEY_CROP_PESTS, JSON.stringify(newList));
+    } catch (e) {
+      console.error('Failed to persist crop pests', e);
+    }
+  };
+
+  const saveCropDiseases = (newList) => {
+    setCropDiseases(newList);
+    try {
+      localStorage.setItem(STORAGE_KEY_CROP_DISEASES, JSON.stringify(newList));
+    } catch (e) {
+      console.error('Failed to persist crop diseases', e);
+    }
+  };
+
+  const saveDiseasePrescriptions = (newList) => {
+    setDiseasePrescriptions(newList);
+    try {
+      localStorage.setItem(STORAGE_KEY_DISEASE_PRESCRIPTIONS, JSON.stringify(newList));
+    } catch (e) {
+      console.error('Failed to persist disease prescriptions', e);
     }
   };
 
@@ -314,6 +388,144 @@ export function ReferenceProvider({ children }) {
     }));
   };
 
+  // ==========================================
+  // CROP PESTS MASTER CRUD & IMPORT
+  // ==========================================
+  const addCropPest = (pestData) => {
+    const id = pestData.id || `${pestData.cropId || 'crop'}-pest-${Date.now()}`;
+    const newPest = {
+      ...pestData,
+      id
+    };
+    const updated = [newPest, ...cropPests.filter(p => p.id !== id)];
+    saveCropPests(updated);
+    return newPest;
+  };
+
+  const updateCropPest = (pestData) => {
+    const updated = cropPests.map(p => p.id === pestData.id ? { ...p, ...pestData } : p);
+    saveCropPests(updated);
+  };
+
+  const deleteCropPest = (pestId) => {
+    const updated = cropPests.filter(p => p.id !== pestId);
+    saveCropPests(updated);
+  };
+
+  const importCropPests = (newPestsArray, mode = 'merge') => {
+    if (!Array.isArray(newPestsArray) || newPestsArray.length === 0) {
+      throw new Error('Invalid or empty pests dataset provided.');
+    }
+    let updated;
+    if (mode === 'replace') {
+      updated = newPestsArray;
+    } else {
+      const incomingIds = new Set(newPestsArray.map(p => p.id));
+      const preserved = cropPests.filter(p => !incomingIds.has(p.id));
+      updated = [...newPestsArray, ...preserved];
+    }
+    saveCropPests(updated);
+    return updated;
+  };
+
+  // ==========================================
+  // CROP DISEASES MASTER CRUD & IMPORT
+  // ==========================================
+  const addCropDisease = (diseaseData) => {
+    const id = diseaseData.id || `${diseaseData.cropId || 'crop'}-disease-${Date.now()}`;
+    const newDisease = {
+      ...diseaseData,
+      id
+    };
+    const updated = [newDisease, ...cropDiseases.filter(d => d.id !== id)];
+    saveCropDiseases(updated);
+    return newDisease;
+  };
+
+  const updateCropDisease = (diseaseData) => {
+    const updated = cropDiseases.map(d => d.id === diseaseData.id ? { ...d, ...diseaseData } : d);
+    saveCropDiseases(updated);
+  };
+
+  const deleteCropDisease = (diseaseId) => {
+    const updated = cropDiseases.filter(d => d.id !== diseaseId);
+    saveCropDiseases(updated);
+  };
+
+  const importCropDiseases = (newDiseasesArray, mode = 'merge') => {
+    if (!Array.isArray(newDiseasesArray) || newDiseasesArray.length === 0) {
+      throw new Error('Invalid or empty diseases dataset provided.');
+    }
+    let updated;
+    if (mode === 'replace') {
+      updated = newDiseasesArray;
+    } else {
+      const incomingIds = new Set(newDiseasesArray.map(d => d.id));
+      const preserved = cropDiseases.filter(d => !incomingIds.has(d.id));
+      updated = [...newDiseasesArray, ...preserved];
+    }
+    saveCropDiseases(updated);
+    return updated;
+  };
+
+  // ==========================================
+  // DISEASE PRESCRIPTIONS REGISTRY CRUD & IMPORT
+  // ==========================================
+  const addDiseasePrescription = (rxData) => {
+    const id = rxData.id || `RX-${(rxData.theme || 'GEN').toUpperCase()}-${Date.now().toString().slice(-4)}`;
+    const newRx = {
+      ...rxData,
+      id,
+      date: rxData.date || new Date().toISOString().split('T')[0],
+      time: rxData.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: rxData.status || 'Prescription Generated & Dispatched'
+    };
+    const updated = [newRx, ...diseasePrescriptions.filter(r => r.id !== id)];
+    saveDiseasePrescriptions(updated);
+    return newRx;
+  };
+
+  const updateDiseasePrescription = (rxData) => {
+    const updated = diseasePrescriptions.map(r => r.id === rxData.id ? { ...r, ...rxData } : r);
+    saveDiseasePrescriptions(updated);
+  };
+
+  const deleteDiseasePrescription = (rxId) => {
+    const updated = diseasePrescriptions.filter(r => r.id !== rxId);
+    saveDiseasePrescriptions(updated);
+  };
+
+  const importDiseasePrescriptions = (newRxArray, mode = 'merge') => {
+    if (!Array.isArray(newRxArray) || newRxArray.length === 0) {
+      throw new Error('Invalid or empty prescriptions dataset provided.');
+    }
+    let updated;
+    if (mode === 'replace') {
+      updated = newRxArray;
+    } else {
+      const incomingIds = new Set(newRxArray.map(r => r.id));
+      const preserved = diseasePrescriptions.filter(r => !incomingIds.has(r.id));
+      updated = [...newRxArray, ...preserved];
+    }
+    saveDiseasePrescriptions(updated);
+    return updated;
+  };
+
+  // Reset to Factory Defaults
+  const resetDatasetToDefault = (type) => {
+    if (type === 'pests') {
+      saveCropPests(CROP_PESTS_DATA);
+    } else if (type === 'diseases') {
+      saveCropDiseases(CROP_DISEASES_DATA);
+    } else if (type === 'prescriptions') {
+      saveDiseasePrescriptions(INITIAL_DISEASE_PRESCRIPTIONS);
+    } else if (type === 'reftypes') {
+      saveTypes(DEFAULT_REF_TYPES);
+    } else if (type === 'dropdowns') {
+      saveDropdownList(DEFAULT_DROPDOWN_LIST);
+    }
+  };
+
   // Helper: Export data to CSV / JSON
   const exportData = (filename, data, format = 'csv') => {
     if (!data || data.length === 0) {
@@ -356,6 +568,9 @@ export function ReferenceProvider({ children }) {
     dropdownList,
     cropCategories,
     cropList,
+    cropPests,
+    cropDiseases,
+    diseasePrescriptions,
     addDropdownItem,
     updateDropdownItem,
     deleteDropdownItem,
@@ -370,6 +585,19 @@ export function ReferenceProvider({ children }) {
     deleteCrop,
     getCropsByCategory,
     getDropdownOptions,
+    addCropPest,
+    updateCropPest,
+    deleteCropPest,
+    importCropPests,
+    addCropDisease,
+    updateCropDisease,
+    deleteCropDisease,
+    importCropDiseases,
+    addDiseasePrescription,
+    updateDiseasePrescription,
+    deleteDiseasePrescription,
+    importDiseasePrescriptions,
+    resetDatasetToDefault,
     exportData
   };
 

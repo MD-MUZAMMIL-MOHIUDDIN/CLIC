@@ -11,7 +11,7 @@ import {
   MACHINERY_OPERATIONS,
   FARM_MACHINES,
   INITIAL_ORDERS
-} from '../data/machineryData';
+} from '../data/machinery/machineryData';
 import '../styles/machinery.css';
 
 export default function CHCPortal() {

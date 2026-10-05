@@ -6,8 +6,8 @@ import {
   MapPin, Phone, ShieldCheck, Edit2, Trash2, Save, X,
   Building2, Sparkles, AlertCircle, Package, ArrowRight, Store, UserCheck
 } from 'lucide-react';
-import { INITIAL_INPUT_STORES } from '../data/inputStoreData';
-import { DEFAULT_INPUT_PRODUCTS, inputStoreCategories } from '../data/inputProducts';
+import { INITIAL_INPUT_STORES } from '../data/inputs/inputStoreData';
+import { DEFAULT_INPUT_PRODUCTS, inputStoreCategories } from '../data/inputs/inputProducts';
 import '../styles/market.css';
 
 export const STORAGE_KEY_INPUT_STORES = 'clic_input_stores_master';

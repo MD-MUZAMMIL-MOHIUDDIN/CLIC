@@ -7,10 +7,10 @@ import {
   Eye, FileText, Video, Link as LinkIcon, BookOpen, AlertTriangle,
   RefreshCw, CheckCircle2, MapPin, Phone, Layers
 } from 'lucide-react';
-import { defaultStates, defaultDistricts, defaultVillages } from '../data/marketData';
-import { DEMO_FARMERS, INITIAL_FARMER_QUERIES } from '../data/machineryData';
-import { videos as initialVideos } from '../data/crops';
-import { getCreateAudit, getUpdateAudit } from '../data/referenceData';
+import { defaultStates, defaultDistricts, defaultVillages } from '../data/master/marketData';
+import { DEMO_FARMERS, INITIAL_FARMER_QUERIES } from '../data/machinery/machineryData';
+import { videos as initialVideos } from '../data/crops/crops';
+import { getCreateAudit, getUpdateAudit } from '../data/master/referenceData';
 import { useReferenceData } from '../context/ReferenceContext';
 import '../styles/facilitator.css';
 

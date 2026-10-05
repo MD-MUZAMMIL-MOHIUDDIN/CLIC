@@ -4,7 +4,7 @@ import { CloudRain, Droplets, Thermometer, Wind, Sun, Cloud, Zap, Download, File
 import {
   currentWeather, weeklyForecast, seasonalOutlook,
   rainfallTrend, groundwaterData, soilMoistureData, tempHumidityData
-} from '../data/weatherData';
+} from '../data/weather/weatherData';
 import {
   HUNDRED_YEARS_WEATHER_DATA,
   DECADAL_SUMMARY_DATA,
@@ -12,7 +12,7 @@ import {
   LPA_NORMAL_RAINFALL,
   downloadHistoricalWeatherExcel,
   downloadHistoricalWeatherCSV
-} from '../data/old_100_years_weather';
+} from '../data/weather/old_100_years_weather';
 import '../styles/weather.css';
 
 const TABS = ['Daily', 'Weekly', 'Seasonal', '100-Year Archive', 'Resource Monitoring'];

@@ -6,22 +6,125 @@ import {
   ShoppingCart, Building2, Users, LogOut,
   ChevronLeft, ChevronRight, Leaf, Droplets, MapPin,
   ChevronDown, ChevronUp, X, Tractor, Store, Wrench, ShieldCheck, Settings,
-  ShoppingBag, Activity
+  ShoppingBag, Activity, Stethoscope, Database, Fish
 } from 'lucide-react';
 import '../../styles/sidebar.css';
 
 const NAV_ITEMS = [
   { path: '/',            label: 'Dashboard',      icon: <LayoutDashboard size={20}/>,  roles: ['farmer','facilitator','management','chc_operator','fmc_dealer','store_manager','livestock_entrepreneur'] },
+  
+  // 🌿 ADVISORY
   { 
-    path: '/admin',       
-    label: 'Admin Console',  
-    icon: <ShieldCheck size={20}/>,      
-    roles: ['management'],
+    path: '/advisory',       
+    label: 'Advisory',  
+    icon: <Leaf size={20}/>,      
+    roles: ['farmer','facilitator','management','livestock_entrepreneur','chc_operator','fmc_dealer','store_manager'],
     submenus: [
-      { path: '/admin?tab=users', label: 'Users', roles: ['management'] },
-      { path: '/admin?tab=roles', label: 'Roles', roles: ['management'] }
+      { path: '/advisory?tab=Crops', label: '🌾 Crop Advisory & POP', roles: ['farmer','facilitator','management'] },
+      { path: '/advisory?tab=Livestock', label: '🐄 Livestock Advisory', roles: ['farmer','facilitator','management','livestock_entrepreneur'] },
+      { path: '/advisory?tab=Fisheries', label: '🐟 Fisheries Advisory', roles: ['farmer','facilitator','management'] },
+      { path: '/advisory?tab=manage', label: '🔧 Manage Advisories', roles: ['facilitator','management'] }
     ]
   },
+  
+  // 🌾 CROPS
+  { 
+    path: '/crops',       
+    label: 'Crops',  
+    icon: <Sprout size={20}/>,      
+    roles: ['farmer','facilitator','management'],
+    submenus: [
+      { path: '/data-upload?tab=crops&sub=categories', label: '📂 Crop Category', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=crops&sub=croplist', label: '🌱 Crop List', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=crops&sub=pests', label: '🐛 Crop Pest', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=crops&sub=diseases', label: '🌿 Crop Disease', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=crops&sub=prescriptions', label: '💊 Prescriptions & Linkages', roles: ['facilitator','management'] },
+      { path: '/advisory?tab=Crops', label: '🌾 Crop Advisory & POP', roles: ['farmer','facilitator','management'] },
+      { path: '/disease-workflow?tab=workflow&theme=crop_pests', label: '🩺 Diagnostic & Treatment Desk', roles: ['facilitator','management'] },
+      { path: '/farmer-services?tab=workflow&theme=crop_pests', label: '🩺 Pest & Disease Self-Check', roles: ['farmer'] },
+      { path: '/learning?tab=Traditional+Grains', label: '🌾 Traditional Grains Hub', roles: ['farmer','facilitator','management'] }
+    ]
+  },
+
+  // 🐄 LIVESTOCK
+  { 
+    path: '/livestock',       
+    label: 'Livestock',  
+    icon: <Activity size={20}/>,      
+    roles: ['farmer','facilitator','management','livestock_entrepreneur'],
+    submenus: [
+      { path: '/data-upload?tab=livestock&sub=categories', label: '📂 Livestock Category', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=livestock&sub=species', label: '🐄 Livestock List', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=livestock&sub=diseases', label: '🌿 Livestock Disease', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=livestock&sub=prescriptions', label: '💊 Prescriptions & Care', roles: ['facilitator','management'] },
+      { path: '/advisory?tab=Livestock', label: '🐄 Livestock Advisory', roles: ['farmer','facilitator','management'] },
+      { path: '/disease-workflow?tab=workflow&theme=livestock', label: '🩺 Livestock Health Desk', roles: ['facilitator','management'] },
+      { path: '/farmer-services?tab=workflow&theme=livestock', label: '🩺 Livestock Health Self-Check', roles: ['farmer'] },
+      { path: '/livestock-portal', label: '🏪 LS Entrepreneur Hub', roles: ['livestock_entrepreneur','facilitator','management'] }
+    ]
+  },
+
+  // 🐟 FISHERIES
+  { 
+    path: '/fisheries',       
+    label: 'Fisheries',  
+    icon: <Fish size={20}/>,      
+    roles: ['farmer','facilitator','management'],
+    submenus: [
+      { path: '/data-upload?tab=fisheries&sub=categories', label: '📂 Fisheries Category', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=fisheries&sub=species', label: '🐟 Fish Species List', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=fisheries&sub=diseases', label: '🌿 Fish Disease', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=fisheries&sub=prescriptions', label: '💊 Prescriptions & Treatments', roles: ['facilitator','management'] },
+      { path: '/advisory?tab=Fisheries', label: '🐟 Fisheries Advisory', roles: ['farmer','facilitator','management'] },
+      { path: '/disease-workflow?tab=workflow&theme=fish', label: '🩺 Fish Health Desk', roles: ['facilitator','management'] },
+      { path: '/farmer-services?tab=workflow&theme=fish', label: '🩺 Fish Health Self-Check', roles: ['farmer'] }
+    ]
+  },
+
+  // 🚜 FARMER SERVICES (Machinery & general)
+  { 
+    path: '/farmer-services',   
+    label: 'Farmer Services', 
+    icon: <Tractor size={20}/>,          
+    roles: ['farmer'],
+    submenus: [
+      { path: '/farmer-services?tab=workflow&theme=machinery', label: '🚜 Farm Machinery', roles: ['farmer'] },
+      { path: '/farmer-services?tab=my_bookings', label: '📋 My Active Bookings', roles: ['farmer'] },
+      { path: '/farmer-services?tab=my_alerts', label: '🔔 My SMS Receipts', roles: ['farmer'] }
+    ]
+  },
+
+  // 🩺 FACILITATOR DESK
+  { 
+    path: '/disease-workflow',   
+    label: 'Facilitator Desk', 
+    icon: <Stethoscope size={20}/>,          
+    roles: ['facilitator','management'],
+    submenus: [
+      { path: '/disease-workflow?tab=workflow&theme=machinery', label: '🚜 Machinery Walk-in', roles: ['facilitator','management'] },
+      { path: '/disease-workflow?tab=orders', label: '📋 District Orders Registry', roles: ['facilitator','management'] },
+      { path: '/disease-workflow?tab=alerts', label: '🔔 Central Alerts Feed', roles: ['facilitator','management'] },
+      { path: '/disease-workflow?tab=onboarding', label: '🏛️ Onboard Entities', roles: ['facilitator','management'] },
+      { path: '/disease-workflow?tab=queries', label: '📝 Farmer Queries Log', roles: ['facilitator','management'] }
+    ]
+  },
+
+  // 📂 MASTER DATA UPLOAD HUB
+  { 
+    path: '/data-upload',       
+    label: 'Upload Master Data',  
+    icon: <Database size={20}/>,      
+    roles: ['facilitator','management'],
+    submenus: [
+      { path: '/data-upload?tab=crops', label: '🌾 Crops Master Hub', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=livestock', label: '🐄 Livestock Hub', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=fisheries', label: '🐟 Fisheries Hub', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=machinery', label: '🚜 Farm Machinery Hub', roles: ['facilitator','management'] },
+      { path: '/data-upload?tab=bulk', label: '⚡ Master Backup & Restore', roles: ['facilitator','management'] }
+    ]
+  },
+
+  // ⚙️ REF & DROPDOWNS
   { 
     path: '/manage',       
     label: 'Ref & Dropdowns',  
@@ -33,18 +136,7 @@ const NAV_ITEMS = [
     ]
   },
 
-  { 
-    path: '/machinery',   
-    label: 'Facilitator Desk', 
-    icon: <Tractor size={20}/>,          
-    roles: ['facilitator','management'],
-    submenus: [
-      { path: '/machinery?tab=workflow', label: 'Walk-in Workflow (6-Step)', roles: ['facilitator','management'] },
-      { path: '/machinery?tab=orders', label: 'All Orders & Bookings', roles: ['facilitator','management'] },
-      { path: '/machinery?tab=alerts', label: 'Workflow Alerts Feed', roles: ['facilitator','management'] },
-      { path: '/machinery?tab=onboarding', label: '🏛️ Onboard CHC & FMC', roles: ['facilitator','management'] }
-    ]
-  },
+  // PORTALS
   {
     path: '/chc-portal',
     label: 'CHC Hub',
@@ -62,24 +154,6 @@ const NAV_ITEMS = [
     label: 'Input Store Hub',
     icon: <ShoppingBag size={20}/>,
     roles: ['store_manager','facilitator','management']
-  },
-  {
-    path: '/livestock-portal',
-    label: 'LS Entrepreneur Hub',
-    icon: <Activity size={20}/>,
-    roles: ['livestock_entrepreneur','facilitator','management']
-  },
-
-  { 
-    path: '/advisory',    
-    label: 'Advisory',        
-    icon: <Sprout size={20}/>,            
-    roles: ['farmer','facilitator','management'],
-    submenus: [
-      { path: '/advisory?tab=Crops', label: 'Crops', roles: ['farmer','facilitator','management'] },
-      { path: '/advisory?tab=Livestock', label: 'Livestock', roles: ['farmer','facilitator','management'] },
-      { path: '/advisory?tab=Fisheries', label: 'Fisheries', roles: ['farmer','facilitator','management'] }
-    ]
   },
   { 
     path: '/groundwater', 
@@ -111,8 +185,7 @@ const NAV_ITEMS = [
       { path: '/learning?tab=Digital Library', label: 'Digital Library', roles: ['farmer','facilitator','management'] },
       { path: '/learning?tab=CHC Machinery', label: 'CHC Machinery', roles: ['farmer','facilitator','management'] },
       { path: '/learning?tab=FMC Machinery', label: 'FMC Machinery', roles: ['farmer','facilitator','management'] },
-      { path: '/learning?tab=Success Stories', label: 'Success Stories', roles: ['farmer','facilitator','management'] },
-      { path: '/learning?tab=Traditional Grains', label: 'Traditional Grains', roles: ['farmer','facilitator','management'] }
+      { path: '/learning?tab=Success Stories', label: 'Success Stories', roles: ['farmer','facilitator','management'] }
     ]
   },
   { path: '/schemes',     label: 'Schemes',         icon: <Building2 size={20}/>,         roles: ['farmer','facilitator','management'] },
@@ -129,6 +202,16 @@ const NAV_ITEMS = [
       { path: '/locations?tab=Villages', label: 'Villages', roles: ['facilitator','management'] }
     ]
   },
+  { 
+    path: '/admin',       
+    label: 'Admin Console',  
+    icon: <ShieldCheck size={20}/>,      
+    roles: ['management'],
+    submenus: [
+      { path: '/admin?tab=users', label: 'Users', roles: ['management'] },
+      { path: '/admin?tab=roles', label: 'Roles', roles: ['management'] }
+    ]
+  },
 ];
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
@@ -141,14 +224,31 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
   const isSuperAdmin = user && (user.role === 'superadmin' || user.roles?.includes('superadmin'));
   const visibleItems = NAV_ITEMS.filter(item => !user || isSuperAdmin || item.roles.includes(user.role) || (user.roles && user.roles.some(r => item.roles.includes(r))));
 
+  // Helper to determine if a sub-route matches the current URL
+  const checkSubActive = (subPathStr) => {
+    const [subPath, subQuery] = subPathStr.split('?');
+    if (location.pathname !== subPath) return false;
+    if (!subQuery) return !location.search || location.search === '';
+    
+    // Check all search params in subQuery match current location.search
+    const requiredParams = new URLSearchParams(subQuery);
+    const currentParams = new URLSearchParams(location.search);
+    for (const [key, val] of requiredParams.entries()) {
+      if (currentParams.get(key) !== val) return false;
+    }
+    return true;
+  };
+
   // Sync open dropdowns on mount and route change
   useEffect(() => {
     visibleItems.forEach(item => {
-      if (location.pathname === item.path && item.submenus) {
+      const isDirectPath = location.pathname === item.path;
+      const isAnySubActive = item.submenus && item.submenus.some(sub => checkSubActive(sub.path));
+      if ((isDirectPath || isAnySubActive) && item.submenus) {
         setOpenMenus(prev => ({ ...prev, [item.path]: true }));
       }
     });
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   const handleParentClick = (item) => {
     setOpenMenus(prev => ({
@@ -200,16 +300,18 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
       <nav className="sidebar-nav">
         <p className={`nav-section-label ${collapsed ? 'hidden' : ''}`}>Navigation</p>
         {visibleItems.map(item => {
-          const isParentActive = location.pathname === item.path;
+          const isDirectActive = location.pathname === item.path;
           const hasSubs = item.submenus && item.submenus.length > 0;
           const visibleSubs = hasSubs ? item.submenus.filter(sub => !user || isSuperAdmin || sub.roles.includes(user.role) || (user.roles && user.roles.some(r => sub.roles.includes(r)))) : [];
+          const isAnyChildActive = visibleSubs.some(s => checkSubActive(s.path));
+          const isItemActive = isDirectActive || isAnyChildActive;
 
           return (
             <div key={item.path} className="sidebar-menu-group" style={{ display: 'flex', flexDirection: 'column' }}>
               <NavLink
                 to={item.path}
                 end={item.path === '/'}
-                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                className={() => `sidebar-link ${isItemActive ? 'active' : ''}`}
                 title={collapsed ? item.label : ''}
                 onClick={() => {
                   if (visibleSubs.length > 0) {
@@ -240,8 +342,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
                 <div className={`sidebar-submenu-wrapper ${openMenus[item.path] ? 'expanded' : 'collapsed'}`}>
                   <div className="sidebar-submenu-inner" style={{ display: 'flex', flexDirection: 'column', gap: '2px', paddingLeft: 'var(--space-8)', borderLeft: '1px solid var(--color-border)', marginLeft: '24px', marginTop: '4px' }}>
                     {visibleSubs.map(sub => {
-                      const searchPart = sub.path.split('?')[1] || '';
-                      const isSubActive = location.search.includes(searchPart);
+                      const isSubActive = checkSubActive(sub.path);
 
                       return (
                         <NavLink

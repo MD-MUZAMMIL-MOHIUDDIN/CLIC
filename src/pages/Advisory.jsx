@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { defaultCategories, crops, pests, livestock, fisheries } from '../data/crops';
+import { useReferenceData } from '../context/ReferenceContext';
+import { defaultCategories, crops, pests, livestock, fisheries } from '../data/crops/crops';
 import {
   Check, ChevronDown, ChevronUp, Bug, Leaf,
   Upload, Sparkles, ShieldAlert, ShieldCheck, Compass, Info,
-  Calculator, Plus, Trash2, Edit2, FolderPlus, Save
+  Calculator, Plus, Trash2, Edit2, FolderPlus, Save,
+  Stethoscope, ArrowRight
 } from 'lucide-react';
 import '../styles/advisory.css';
 
@@ -15,86 +17,164 @@ const MGMT_SECTIONS = ['Categories', 'Crops Database', 'Pests & Diseases', 'Live
 
 export default function Advisory() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const [activeMainTab, setActiveMainTab] = useState('Crops Advisory');
+
+  const {
+    cropCategories: masterCategories,
+    cropList: masterCrops,
+    cropPests: masterPests,
+    cropDiseases: masterDiseases
+  } = useReferenceData();
 
   const tabParam = searchParams.get('tab');
   useEffect(() => {
     if (tabParam) {
       const match = MAIN_TABS.find(t => t.toLowerCase().includes(tabParam.toLowerCase()));
       if (match) setActiveMainTab(match);
-    }
-  }, [tabParam]);
-
-  // Dynamic States for Data Management
-  const [categories, setCategories] = useState([]);
-  const [cropsList, setCropsList] = useState([]);
-  const [pestsList, setPestsList] = useState([]);
-  const [livestockList, setLivestockList] = useState([]);
-  const [fisheriesData, setFisheriesData] = useState(null);
-
-  // Initialize data from localStorage or crops.js seeds
-  useEffect(() => {
-    // Categories
-    const savedCats = localStorage.getItem('clic_categories');
-    if (savedCats) {
-      try { setCategories(JSON.parse(savedCats)); } catch { setCategories(defaultCategories); }
+    } else if (location.pathname === '/livestock') {
+      setActiveMainTab('Livestock Advisory');
+    } else if (location.pathname === '/fisheries') {
+      setActiveMainTab('Fisheries Advisory');
+    } else if (location.pathname === '/crops') {
+      setActiveMainTab('Crops Advisory');
     } else {
-      setCategories(defaultCategories);
-      localStorage.setItem('clic_categories', JSON.stringify(defaultCategories));
+      setActiveMainTab('Crops Advisory');
     }
+  }, [tabParam, location.pathname]);
 
-    // Crops
-    const savedCrops = localStorage.getItem('clic_crops');
-    if (savedCrops) {
-      try { setCropsList(JSON.parse(savedCrops)); } catch { setCropsList(crops); }
-    } else {
-      setCropsList(crops);
-      localStorage.setItem('clic_crops', JSON.stringify(crops));
-    }
-
-    // Pests
-    const savedPests = localStorage.getItem('clic_pests');
-    if (savedPests) {
-      try { setPestsList(JSON.parse(savedPests)); } catch { setPestsList(pests); }
-    } else {
-      setPestsList(pests);
-      localStorage.setItem('clic_pests', JSON.stringify(pests));
-    }
-
-    // Livestock
-    const savedLivestock = localStorage.getItem('clic_livestock');
-    if (savedLivestock) {
-      try { setLivestockList(JSON.parse(savedLivestock)); } catch { setLivestockList(livestock); }
-    } else {
-      setLivestockList(livestock);
-      localStorage.setItem('clic_livestock', JSON.stringify(livestock));
-    }
-
-    // Fisheries
-    const savedFisheries = localStorage.getItem('clic_fisheries');
-    if (savedFisheries) {
-      try { setFisheriesData(JSON.parse(savedFisheries)); } catch { setFisheriesData(fisheries); }
-    } else {
-      setFisheriesData(fisheries);
-      localStorage.setItem('clic_fisheries', JSON.stringify(fisheries));
-    }
-  }, []);
-
-  const saveCategories = (updated) => {
-    setCategories(updated);
-    localStorage.setItem('clic_categories', JSON.stringify(updated));
+  const handleTabChange = (tabName) => {
+    setActiveMainTab(tabName);
+    const paramMap = {
+      'Crops Advisory': 'Crops',
+      'Livestock Advisory': 'Livestock',
+      'Fisheries Advisory': 'Fisheries',
+      '🔧 Manage Advisories': 'manage'
+    };
+    const key = paramMap[tabName] || 'Crops';
+    setSearchParams({ tab: key });
   };
 
-  const saveCrops = (updated) => {
-    setCropsList(updated);
-    localStorage.setItem('clic_crops', JSON.stringify(updated));
+  // Helper to build complete POP package for any crop
+  const resolveCropObject = (c) => {
+    const rawId = (c.code || c.id || '').toLowerCase();
+    const rawName = (c.name || '').toLowerCase();
+    const foundInSeed = crops.find(sc => 
+      sc.id.toLowerCase() === rawId || 
+      sc.name.toLowerCase() === rawName
+    );
+    if (foundInSeed) {
+      return {
+        ...foundInSeed,
+        id: c.code ? c.code.toLowerCase() : foundInSeed.id,
+        name: c.name || foundInSeed.name,
+        telugu: c.telugu || foundInSeed.telugu,
+        category: c.categoryCode || c.categoryName || foundInSeed.category
+      };
+    }
+
+    const categoryName = c.categoryName || c.categoryCode || 'Cereals';
+    const cleanId = (c.code || c.name || `crop-${c.id}`).toLowerCase().replace(/\s+/g, '-');
+    return {
+      id: cleanId,
+      name: c.name || 'New Crop',
+      telugu: c.telugu || '',
+      category: categoryName,
+      icon: categoryName.toLowerCase().includes('cereal') ? '🌾' :
+            categoryName.toLowerCase().includes('pulse') ? '🫘' :
+            categoryName.toLowerCase().includes('oil') ? '🥜' :
+            categoryName.toLowerCase().includes('veg') || categoryName.toLowerCase().includes('hort') ? '🍅' :
+            categoryName.toLowerCase().includes('millet') ? '🌾' :
+            categoryName.toLowerCase().includes('spice') ? '🌶️' : '🌱',
+      season: 'Kharif / Rabi Season',
+      sowingWindow: 'June – July / October – November',
+      variety: `${c.name} High Yielding Regional & Hybrid Varieties`,
+      soilType: 'Well-drained fertile loam / clay loam soils with balanced organic matter',
+      pop: [
+        { stage: 'Land Preparation', days: '15–20 days before sowing', advice: `Deep plough 2–3 times to fine tilth. Incorporate 5–6 tonnes FYM/vermicompost per acre. Maintain proper field drainage channels.`, inputs: 'FYM 5t/acre' },
+        { stage: 'Seed Treatment', days: '1 day before sowing', advice: `Treat seeds with bio-fungicide Trichoderma viride @ 4g/kg seed + Azotobacter/Rhizobium bio-culture @ 10g/kg seed for disease suppression and root health.`, inputs: 'Trichoderma, Bio-Fertilizer' },
+        { stage: 'Sowing & Spacing', days: 'Day 0', advice: `Sow certified seeds at recommended spacing and depth. Ensure adequate soil moisture for uniform field emergence.`, inputs: 'Certified Seeds' },
+        { stage: 'Nutrient Management (Basal)', days: 'At sowing / transplanting', advice: `Apply basal dose of recommended NPK fertilizers with zinc and micronutrient blend based on Soil Health Card analysis.`, inputs: 'Basal NPK + Zinc' },
+        { stage: 'Weed & Water Management', days: 'Day 20–45', advice: `Perform inter-cultivation or hand weeding at 20 and 40 DAS. Maintain critical stage irrigations during flowering and pod/grain setting.`, inputs: 'Micro-irrigation' },
+        { stage: 'Integrated Pest & Disease Mgmt', days: 'Vegetative to maturity', advice: `Install pheromone traps and yellow sticky sheets. Spray botanical Neem Oil 10,000 PPM @ 2ml/L as preventive barrier.`, inputs: 'Neem Formulation' },
+        { stage: 'Harvesting & Post-Harvest', days: 'Maturity stage', advice: `Harvest at physiological maturity when crop turns golden/ripe. Dry produce to safe moisture content (<12%) before bagging.`, inputs: 'Clean bags & storage' }
+      ]
+    };
   };
 
-  const savePests = (updated) => {
-    setPestsList(updated);
-    localStorage.setItem('clic_pests', JSON.stringify(updated));
-  };
+  // Derive categories live from ReferenceContext
+  const categories = useMemo(() => {
+    const names = new Set([
+      ...defaultCategories,
+      ...(masterCategories || []).map(mc => mc.name || mc.code)
+    ]);
+    return Array.from(names).filter(Boolean);
+  }, [masterCategories]);
+
+  // Derive unified crops live from ReferenceContext
+  const cropsList = useMemo(() => {
+    if (!masterCrops || masterCrops.length === 0) return crops;
+    return masterCrops.map(resolveCropObject);
+  }, [masterCrops]);
+
+  // Derive unified pests & diseases live from ReferenceContext
+  const pestsList = useMemo(() => {
+    let combined = [...pests];
+    if (masterPests && masterPests.length > 0) {
+      masterPests.forEach(mp => {
+        if (!combined.some(p => p.name.toLowerCase() === mp.name.toLowerCase())) {
+          combined.push({
+            id: mp.id,
+            name: mp.name,
+            telugu: mp.telugu || '',
+            crop: mp.cropId || 'General',
+            type: 'pest',
+            severity: 'high',
+            symptom: mp.damageSymptoms || '',
+            control: mp.controlMeasures?.chemical || mp.controlMeasures?.biological || '',
+            organic: mp.controlMeasures?.biological || '',
+            chemical: mp.controlMeasures?.chemical || '',
+            video: mp.video?.url || ''
+          });
+        }
+      });
+    }
+    if (masterDiseases && masterDiseases.length > 0) {
+      masterDiseases.forEach(md => {
+        if (!combined.some(p => p.name.toLowerCase() === md.name.toLowerCase())) {
+          combined.push({
+            id: md.id,
+            name: md.name,
+            telugu: md.telugu || '',
+            crop: md.cropId || 'General',
+            type: 'disease',
+            severity: 'high',
+            symptom: md.symptoms || '',
+            control: md.controlMeasures?.chemical_fungicide || md.controlMeasures?.organic_biocontrol || '',
+            organic: md.controlMeasures?.organic_biocontrol || '',
+            chemical: md.controlMeasures?.chemical_fungicide || '',
+            video: md.video?.url || ''
+          });
+        }
+      });
+    }
+    return combined;
+  }, [masterPests, masterDiseases]);
+
+  // Dynamic States for Livestock & Fisheries
+  const [livestockList, setLivestockList] = useState(() => {
+    const saved = localStorage.getItem('clic_livestock');
+    return saved ? JSON.parse(saved) : livestock;
+  });
+  const [fisheriesData, setFisheriesData] = useState(() => {
+    const saved = localStorage.getItem('clic_fisheries');
+    return saved ? JSON.parse(saved) : fisheries;
+  });
+
+  const saveCategories = (updated) => {};
+  const saveCrops = (updated) => {};
+  const savePests = (updated) => {};
 
   const saveLivestock = (updated) => {
     setLivestockList(updated);
@@ -124,7 +204,7 @@ export default function Advisory() {
           <button
             key={t}
             className={`advisory-tab ${activeMainTab === t ? 'active' : ''}`}
-            onClick={() => setActiveMainTab(t)}
+            onClick={() => handleTabChange(t)}
           >
             {t === 'Crops Advisory' ? '🌾 Crops' :
              t === 'Livestock Advisory' ? '🐄 Livestock' :
@@ -578,6 +658,7 @@ function PestView({ pestsList }) {
 // LIVESTOCK ADVISORY VIEW
 // ============================================================
 function LivestockAdvisoryView({ livestockList }) {
+  const navigate = useNavigate();
   const [selectedLivestock, setSelectedLivestock] = useState(null);
   const [expandedSection, setExpandedSection] = useState(0);
 
@@ -592,6 +673,20 @@ function LivestockAdvisoryView({ livestockList }) {
 
   return (
     <div className="livestock-view">
+      {/* Walk-in Diagnosis Workflow Launcher Banner */}
+      <div className="card" style={{ background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.05))', border: '1px solid rgba(5, 150, 105, 0.3)', marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <span style={{ fontSize: '28px' }}>🩺</span>
+          <div>
+            <h4 style={{ fontWeight: 'bold', color: 'var(--color-mint)' }}>Farmer Walk-in Livestock Diagnosis & Prescription Desk</h4>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)', margin: 0 }}>Follow the 6-step SOP: Query $\rightarrow$ Profile $\rightarrow$ Clinical Diagnosis $\rightarrow$ Link to LS Shop $\rightarrow$ Alerts & Closure.</p>
+          </div>
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={() => navigate('/disease-workflow?theme=livestock')}>
+          Launch Livestock Diagnosis Workflow <ArrowRight size={14} />
+        </button>
+      </div>
+
       {/* Species selector */}
       <div className="livestock-selector">
         {livestockList.map(l => (
@@ -692,6 +787,7 @@ function LivestockAdvisoryView({ livestockList }) {
 // FISHERIES ADVISORY VIEW
 // ============================================================
 function FisheriesAdvisoryView({ fisheriesData }) {
+  const navigate = useNavigate();
   const [expandedFishSection, setExpandedFishSection] = useState('varieties');
 
   // Calculator states
@@ -707,6 +803,20 @@ function FisheriesAdvisoryView({ fisheriesData }) {
 
   return (
     <div className="fisheries-view">
+      {/* Walk-in Fish Diagnosis Workflow Launcher Banner */}
+      <div className="card" style={{ background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(14, 165, 233, 0.05))', border: '1px solid rgba(2, 132, 199, 0.3)', marginBottom: 'var(--space-4)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <span style={{ fontSize: '28px' }}>🐟</span>
+          <div>
+            <h4 style={{ fontWeight: 'bold', color: '#0284c7' }}>Farmer Walk-in Fish Diseases Diagnosis & Remedy Desk</h4>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)', margin: 0 }}>Follow the 6-step SOP: Fish Disease symptoms $\rightarrow$ Video demo $\rightarrow$ Link to LS Shop inventory $\rightarrow$ Alerts dispatch.</p>
+          </div>
+        </div>
+        <button className="btn btn-primary btn-sm" onClick={() => navigate('/disease-workflow?theme=fish')}>
+          Launch Fish Diseases Workflow <ArrowRight size={14} />
+        </button>
+      </div>
+
       {/* Calculator Widget */}
       <div className="card calculator-card">
         <div className="calc-header">

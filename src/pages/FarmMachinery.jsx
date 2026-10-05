@@ -7,12 +7,12 @@ import {
   DEMO_FARMERS,
   INITIAL_ORDERS,
   INITIAL_FARMER_QUERIES
-} from '../data/machineryData';
+} from '../data/machinery/machineryData';
 import {
   defaultStates,
   defaultDistricts,
   defaultVillages
-} from '../data/marketData';
+} from '../data/master/marketData';
 import {
   Tractor, Search, ArrowRight, ArrowLeft, CheckCircle,
   Play, Image, FileText, ShoppingCart, Calendar,

@@ -20,6 +20,9 @@ import InputStorePortal from './pages/InputStorePortal';
 import LivestockPortal from './pages/LivestockPortal';
 import AdminPortal from './pages/AdminPortal';
 import ManageHub from './pages/ManageHub';
+import DiseaseWorkflow from './pages/DiseaseWorkflow';
+import FarmerServices from './pages/FarmerServices';
+import DataUploadHub from './pages/DataUploadHub';
 
 export default function App() {
   return (
@@ -32,8 +35,17 @@ export default function App() {
               <Route index element={<Dashboard />} />
               <Route path="admin" element={<AdminPortal />} />
               <Route path="manage" element={<ManageHub />} />
-              <Route path="machinery" element={<FarmMachinery />} />
-              <Route path="farm-machinery" element={<FarmMachinery />} />
+              <Route path="crops" element={<Advisory />} />
+              <Route path="livestock" element={<Advisory />} />
+              <Route path="fisheries" element={<Advisory />} />
+              <Route path="data-upload" element={<DataUploadHub />} />
+              <Route path="upload-data" element={<DataUploadHub />} />
+              <Route path="farmer-services" element={<FarmerServices />} />
+              <Route path="farmer-portal" element={<FarmerServices />} />
+              <Route path="machinery" element={<DiseaseWorkflow />} />
+              <Route path="farm-machinery" element={<DiseaseWorkflow />} />
+              <Route path="disease-workflow" element={<DiseaseWorkflow />} />
+              <Route path="walkin-diagnosis" element={<DiseaseWorkflow />} />
               <Route path="chc-portal" element={<CHCPortal />} />
               <Route path="fmc-portal" element={<FMCPortal />} />
               <Route path="input-store-portal" element={<InputStorePortal />} />

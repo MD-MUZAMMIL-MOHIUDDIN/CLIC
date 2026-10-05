@@ -55,7 +55,8 @@ export const defaultVillagePrices = [
 export const markets = ['All Markets', 'Nalgonda APMC', 'Miryalaguda APMC', 'Suryapet APMC'];
 
 // Backward compatibility re-exports from dedicated files
-export { chcEquipment } from './chcData';
-export { inputStore } from './inputStoreData';
+export { chcEquipment } from '../machinery/chcEquipment';
+export { inputStore } from '../inputs/inputStoreData';
 
 export default marketPrices;
+

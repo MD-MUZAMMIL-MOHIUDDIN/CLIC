@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { videos as initialVideos, successStories, millets } from '../data/crops';
-import { FARM_MACHINES, MACHINERY_OPERATIONS } from '../data/machineryData';
+import { videos as initialVideos, successStories, millets } from '../data/crops/crops';
+import { FARM_MACHINES, MACHINERY_OPERATIONS } from '../data/machinery/machineryData';
 import {
   Play, Eye, Users, Wheat, FileText, Link2, BookOpen, Tag,
   Plus, Search, CheckCircle2, AlertCircle, Trash2, Edit2, Save,

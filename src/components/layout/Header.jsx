@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Bell, MapPin, LogOut, Menu } from 'lucide-react';
-import { alerts } from '../../data/weatherData';
+import { alerts } from '../../data/weather/weatherData';
 import '../../styles/header.css';
 
 const FARMER_NAV = [

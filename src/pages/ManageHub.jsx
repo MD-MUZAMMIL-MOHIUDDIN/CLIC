@@ -291,8 +291,17 @@ function MasterReferenceConsole() {
           </button>
         </div>
 
-        <div className="badge badge-forest" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
-          <span>Master Dropdowns & Ref Tables</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <a
+            href="/data-upload"
+            className="btn-ref-add"
+            style={{ textDecoration: 'none', background: '#2d6a4f', color: '#ffffff', border: 'none' }}
+          >
+            <Database size={15} /> 📤 Open Master Data Upload Hub
+          </a>
+          <div className="badge badge-forest" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
+            <span>Master Dropdowns & Ref Tables</span>
+          </div>
         </div>
       </div>
 

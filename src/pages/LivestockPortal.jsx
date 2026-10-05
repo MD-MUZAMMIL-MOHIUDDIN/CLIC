@@ -6,8 +6,8 @@ import {
   MapPin, Phone, ShieldCheck, Edit2, Trash2, Save, X,
   Building2, Sparkles, AlertCircle, Package, ArrowRight, Activity, UserCheck
 } from 'lucide-react';
-import { INITIAL_LIVESTOCK_SHOPS } from '../data/livestockShops';
-import { DEFAULT_LIVESTOCK_PRODUCTS, livestockProductCategories } from '../data/livestockProducts';
+import { INITIAL_LIVESTOCK_SHOPS } from '../data/livestock/livestockShops';
+import { DEFAULT_LIVESTOCK_PRODUCTS, livestockProductCategories } from '../data/livestock/livestockProducts';
 import '../styles/market.css';
 
 export const STORAGE_KEY_LS_SHOPS = 'clic_livestock_shops_master';

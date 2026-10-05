@@ -10,7 +10,7 @@ import {
   defaultVillagePrices,
   markets,
   inputStore
-} from '../data/marketData';
+} from '../data/master/marketData';
 import {
   TrendingUp, TrendingDown, Minus, Search,
   Leaf, Zap, Wind, Settings, CircleDot, Droplets, MinimizeIcon,

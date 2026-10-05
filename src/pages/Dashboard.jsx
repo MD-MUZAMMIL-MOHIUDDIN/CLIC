@@ -7,9 +7,9 @@ import {
   ShoppingCart, Building2, Bug, Tractor, ArrowRight,
   Cloud, BookOpen, PhoneCall
 } from 'lucide-react';
-import { currentWeather, alerts } from '../data/weatherData';
-import { marketPrices } from '../data/marketData';
-import { schemes } from '../data/schemes';
+import { currentWeather, alerts } from '../data/weather/weatherData';
+import { marketPrices } from '../data/master/marketData';
+import { schemes } from '../data/master/schemes';
 import '../styles/dashboard.css';
 
 export default function Dashboard() {
@@ -119,10 +119,24 @@ export default function Dashboard() {
           <div className="card operations-card">
             <div className="section-title">Support Services Quick Access</div>
             <div className="ops-grid">
-              <button className="ops-btn btn-green" onClick={() => navigate('/advisory')}>
-                <div className="ops-icon-container"><Bug size={20} /></div>
-                <h4>Pest Management & advisory</h4>
-                <p>Stage-wise package of practices & image uploader</p>
+              <button 
+                className="ops-btn btn-green" 
+                onClick={() => navigate(user?.role === 'farmer' ? '/farmer-services' : '/disease-workflow')}
+              >
+                <div className="ops-icon-container" style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#059669' }}>
+                  🩺
+                </div>
+                <h4>{user?.role === 'farmer' ? 'Self-Service Diagnosis & Desk' : 'Diagnosis & Services Desk'}</h4>
+                <p>{user?.role === 'farmer' ? 'Direct 4-step booking for Farm Machinery, Fish & Livestock health' : 'Assisted walk-in desk for Farm Machinery, Fish & Livestock health'}</p>
+              </button>
+
+              <button 
+                className="ops-btn btn-amber" 
+                onClick={() => navigate(user?.role === 'farmer' ? '/farmer-services?theme=machinery' : '/disease-workflow?theme=machinery')}
+              >
+                <div className="ops-icon-container"><Tractor size={20} /></div>
+                <h4>Farm Machinery (CHC & FMC)</h4>
+                <p>Custom hiring equipment rental & subsidized machine purchase</p>
               </button>
 
               <button className="ops-btn btn-sky" onClick={() => navigate('/schemes')}>
@@ -131,20 +145,10 @@ export default function Dashboard() {
                 <p>Apply for subsidies, crop insurance & financial support</p>
               </button>
 
-              <button className="ops-btn btn-amber" onClick={() => {
-                if (user?.role === 'chc_operator') navigate('/chc-portal');
-                else if (user?.role === 'fmc_dealer') navigate('/fmc-portal');
-                else navigate('/machinery');
-              }}>
-                <div className="ops-icon-container"><Tractor size={20} /></div>
-                <h4>{user?.role === 'chc_operator' ? 'CHC Fleet Console' : user?.role === 'fmc_dealer' ? 'FMC Dealer Console' : 'Farm Machinery Desk'}</h4>
-                <p>{user?.role === 'chc_operator' ? 'Register fleet machines & confirm walk-in rental alerts' : user?.role === 'fmc_dealer' ? 'Register machine models & confirm purchase work orders' : 'Walk-in workflow, equipment hire, purchase & live alerts'}</p>
-              </button>
-
-              <button className="ops-btn btn-soil" onClick={() => navigate('/learning')}>
-                <div className="ops-icon-container"><BookOpen size={20} /></div>
-                <h4>Farmer Knowledge Bank</h4>
-                <p>Access organic farming videos, manuals & resources</p>
+              <button className="ops-btn btn-soil" onClick={() => navigate('/advisory')}>
+                <div className="ops-icon-container"><Bug size={20} /></div>
+                <h4>Pest Management & Advisory</h4>
+                <p>Stage-wise package of practices & plant image scanner</p>
               </button>
             </div>
           </div>
